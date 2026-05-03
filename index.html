@@ -833,7 +833,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.2.0';
+    const APP_VERSION = '0.3.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -935,6 +935,10 @@
     }
     function getMyRating(recId)   { return state.data.valoraciones.find(v => v.recomendacion_id === recId && v.usuario === state.currentUser); }
     function getMyReaction(recId) { return state.data.reacciones.find(r => r.recomendacion_id === recId && r.usuario === state.currentUser); }
+    function isAdmin() {
+      const u = getUserBy(state.currentUser);
+      return u && String(u.admin).toUpperCase() === 'TRUE';
+    }
     function escapeHTML(s) {
       if (s == null) return '';
       return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -1279,7 +1283,7 @@
       if (state.formNew.categoria === 'musica' && !state.formNew.subcategoria) return toast('Elige tipo de música', 'error');
       if (!titulo) return toast('Escribe un título', 'error');
       btn.disabled = true;
-      btn.textContent = 'Enviando...';
+      btn.textContent = 'Enriqueciendo con IA... ✨';
       try {
         const res = await apiGet('createRec', {
           autor: state.currentUser,
@@ -1350,15 +1354,22 @@
             <p>${escapeHTML(r.sinopsis)}</p>
             ${r.creador ? `<p><strong>${cat.color === 'libros' ? 'Autor' : 'Creador'}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
             ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
+            ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
             ${r.plataformas ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
             ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${escapeHTML(r.rotten_tomatoes)}</p>` : ''}
             ${r.enlace_principal ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">Ver más →</a></p>` : ''}
+            ${(isMine || isAdmin()) ? `<p style="margin-top:var(--s-3); text-align:right;"><button class="btn-ghost" id="reEnrichBtn" style="font-size:12px;">🔄 Regenerar info</button></p>` : ''}
           </div>
-        ` : (r.estado_enriquecimiento === 'pendiente' ? `
+        ` : (String(r.estado_enriquecimiento || '').startsWith('error') ? `
           <div class="detail-section">
-            <p style="text-align:center;">⏳ Enriquecimiento automático: pendiente Fase 3</p>
+            <p style="text-align:center; color:var(--c-danger);">⚠️ Error al enriquecer: ${escapeHTML(String(r.estado_enriquecimiento).replace(/^error: /, ''))}</p>
+            ${(isMine || isAdmin()) ? `<div style="text-align:center; margin-top:var(--s-3);"><button class="btn-ghost" id="reEnrichBtn">🔄 Reintentar</button></div>` : ''}
           </div>
-        ` : '')}
+        ` : (r.estado_enriquecimiento === 'enriqueciendo' || r.estado_enriquecimiento === 'pendiente' ? `
+          <div class="detail-section">
+            <p style="text-align:center;">⏳ Enriqueciendo con IA... <span id="autoRefreshHint" style="font-size:12px; color:var(--ink-soft); display:block; margin-top:8px;">Refrescando automáticamente...</span></p>
+          </div>
+        ` : '')) }
 
         <div class="detail-section">
           <h3>¿Qué te ha parecido?</h3>
@@ -1527,6 +1538,39 @@
             toast('Error: ' + err.message, 'error');
           }
         });
+      }
+
+      // Botón de re-enriquecer (solo autor o admin)
+      const reEnrichBtn = document.getElementById('reEnrichBtn');
+      if (reEnrichBtn) {
+        reEnrichBtn.addEventListener('click', async () => {
+          reEnrichBtn.disabled = true;
+          reEnrichBtn.textContent = 'Enriqueciendo... ✨';
+          try {
+            await apiGet('reEnrich', { recId: r.id });
+            toast('Información regenerada ✨', 'success');
+            await loadData({ silent: true });
+            renderRecDetail(r.id);
+          } catch (err) {
+            toast('Error: ' + err.message, 'error');
+            reEnrichBtn.disabled = false;
+            reEnrichBtn.textContent = '🔄 Regenerar info';
+          }
+        });
+      }
+
+      // Auto-refresh si está enriqueciendo (en background)
+      if (r.estado_enriquecimiento === 'enriqueciendo' || r.estado_enriquecimiento === 'pendiente') {
+        // Aborta cualquier polling previo
+        if (window._enrichPoll) clearTimeout(window._enrichPoll);
+        window._enrichPoll = setTimeout(async () => {
+          await loadData({ silent: true });
+          // Solo re-renderiza si seguimos en la misma pantalla
+          const { screen, param } = parseRoute(location.hash);
+          if (screen === 'rec' && param === r.id) {
+            renderRecDetail(r.id);
+          }
+        }, 4000); // 4 segundos
       }
     }
 
