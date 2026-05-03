@@ -12,32 +12,24 @@
   <base href="/bromendations/">
   <title>BROmendations</title>
 
-  <!-- Google Fonts: Playfair Display + Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ============================================================
-       SISTEMA DE DISEÑO - BROmendations
-       Tipografía: Playfair Display (titulares) + Inter (cuerpo)
-       Sistema 8pt, radio 20px, sombras suaves
-       ============================================================ */
     :root {
-      /* Paleta principal (categorías + acción) */
       --c-peliculas: #FF8A80;
       --c-series:    #6BA4FF;
       --c-musica:    #B99AE6;
       --c-libros:    #FFC857;
       --c-action:    #2E8B6C;
+      --c-danger:    #C2453B;
 
-      /* Versiones suaves para fondos de tarjetas */
       --c-peliculas-soft: #FFD9D4;
       --c-series-soft:    #D6E4FF;
       --c-musica-soft:    #E8DEFA;
       --c-libros-soft:    #FFEAB3;
 
-      /* Neutros */
       --bg:        #FFF7ED;
       --surface:   #FFFFFF;
       --gray-50:   #F2F4F7;
@@ -46,16 +38,9 @@
       --ink:       #2C2F33;
       --ink-soft:  #5A6068;
 
-      /* Sistema espaciado 8pt */
-      --s-1: 4px;
-      --s-2: 8px;
-      --s-3: 12px;
-      --s-4: 16px;
-      --s-5: 24px;
-      --s-6: 32px;
-      --s-7: 48px;
+      --s-1: 4px;  --s-2: 8px;  --s-3: 12px;  --s-4: 16px;
+      --s-5: 24px; --s-6: 32px; --s-7: 48px;
 
-      /* Otros */
       --radius: 20px;
       --radius-sm: 12px;
       --radius-pill: 999px;
@@ -63,16 +48,13 @@
       --shadow-soft: 0 2px 8px rgba(0,0,0,0.04);
       --max-w: 680px;
 
-      /* Fuentes */
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: var(--bg);
       color: var(--ink);
       font-family: var(--font-body);
@@ -82,95 +64,60 @@
       -moz-osx-font-smoothing: grayscale;
       overscroll-behavior-y: contain;
     }
-
     button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
     a { color: inherit; text-decoration: none; }
     img { max-width: 100%; display: block; }
+    input, textarea, select { font-family: inherit; font-size: 16px; }
 
-    /* ============================================================
-       LAYOUT PRINCIPAL
-       ============================================================ */
     .app {
       min-height: 100vh;
       max-width: var(--max-w);
       margin: 0 auto;
-      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      padding-bottom: calc(120px + env(safe-area-inset-bottom));
       position: relative;
     }
-
-    .screen {
-      display: none;
-      padding: var(--s-5) var(--s-4) 0;
-      animation: fadeIn 0.3s ease;
-    }
+    .screen { display: none; padding: var(--s-5) var(--s-4) 0; animation: fadeIn 0.3s ease; }
     .screen.active { display: block; }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ============================================================
-       HEADER PANTALLA INICIO
-       ============================================================ */
-    .home-header {
-      position: relative;
-      padding-right: 96px;
-      margin-bottom: var(--s-5);
-    }
+    .home-header { position: relative; padding-right: 96px; margin-bottom: var(--s-5); }
     .home-header h1 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 36px;
-      line-height: 1.1;
-      margin: 0 0 var(--s-3);
-      letter-spacing: -0.5px;
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 36px; line-height: 1.1;
+      margin: 0 0 var(--s-3); letter-spacing: -0.5px;
     }
-    .home-header .wave { display: inline-block; transform-origin: 70% 70%; animation: wave 2.5s ease-in-out infinite; }
+    .home-header .wave {
+      display: inline-block; transform-origin: 70% 70%;
+      animation: wave 2.5s ease-in-out infinite;
+    }
     @keyframes wave {
       0%, 60%, 100% { transform: rotate(0deg); }
       10%, 30% { transform: rotate(14deg); }
       20% { transform: rotate(-8deg); }
       40%, 50% { transform: rotate(14deg); }
     }
-    .home-header p {
-      margin: 0;
-      color: var(--ink-soft);
-      font-size: 15px;
-      max-width: 22ch;
-    }
+    .home-header p { margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 22ch; }
     .home-header .deco {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      width: 96px;
-      height: 96px;
+      position: absolute; top: -8px; right: -8px;
+      width: 96px; height: 96px;
       background: linear-gradient(135deg, #FFE8C8 0%, #FFC857 100%);
-      border-radius: 50%;
-      opacity: 0.5;
-      filter: blur(12px);
-      pointer-events: none;
+      border-radius: 50%; opacity: 0.5;
+      filter: blur(12px); pointer-events: none;
     }
 
-    /* ============================================================
-       TARJETAS DE CATEGORÍA (grid 2x2)
-       ============================================================ */
     .categories {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--s-3);
-      margin-bottom: var(--s-6);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--s-3); margin-bottom: var(--s-6);
     }
     .cat-card {
-      position: relative;
-      border-radius: var(--radius);
-      padding: var(--s-4);
-      aspect-ratio: 1 / 1.15;
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative; border-radius: var(--radius);
+      padding: var(--s-3); aspect-ratio: 1 / 1.2;
+      display: flex; flex-direction: column;
+      box-shadow: var(--shadow-card); overflow: hidden;
+      transition: transform 0.2s ease;
     }
     .cat-card:active { transform: scale(0.98); }
     .cat-card.peliculas { background: var(--c-peliculas-soft); }
@@ -178,66 +125,42 @@
     .cat-card.musica    { background: var(--c-musica-soft); }
     .cat-card.libros    { background: var(--c-libros-soft); }
 
-    .cat-card-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-2); }
+    .cat-card-head { display: flex; align-items: flex-start; gap: var(--s-2); margin-bottom: var(--s-2); }
     .cat-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       background: rgba(255,255,255,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .cat-icon svg { width: 22px; height: 22px; }
+    .cat-icon svg { width: 20px; height: 20px; }
     .cat-card.peliculas .cat-icon svg { color: #C2453B; }
     .cat-card.series .cat-icon svg    { color: #2A5FB8; }
     .cat-card.musica .cat-icon svg    { color: #6B4FAE; }
     .cat-card.libros .cat-icon svg    { color: #B8841A; }
-
+    .cat-card-text { flex: 1; min-width: 0; }
     .cat-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 22px;
-      letter-spacing: -0.3px;
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 20px; letter-spacing: -0.3px;
+      line-height: 1.1; margin-bottom: 2px;
     }
     .cat-card.peliculas .cat-name { color: #4A1D19; }
     .cat-card.series .cat-name    { color: #14306B; }
     .cat-card.musica .cat-name    { color: #322657; }
     .cat-card.libros .cat-name    { color: #5C3E0A; }
-
     .cat-count {
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0.75;
+      font-size: 12px; font-weight: 500; opacity: 0.75;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .cat-card.peliculas .cat-count { color: #4A1D19; }
-    .cat-card.series .cat-count    { color: #14306B; }
-    .cat-card.musica .cat-count    { color: #322657; }
-    .cat-card.libros .cat-count    { color: #5C3E0A; }
-
-    /* Placeholder para imagen 3D - sustituirá las que crees después */
     .cat-art {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      opacity: 0.85;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 64px; opacity: 0.85;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
     }
-
     .cat-arrow {
-      position: absolute;
-      bottom: var(--s-3);
-      right: var(--s-3);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      position: absolute; bottom: var(--s-3); right: var(--s-3);
+      width: 36px; height: 36px; border-radius: 50%;
       background: var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow-soft);
     }
     .cat-arrow svg { width: 16px; height: 16px; }
@@ -246,139 +169,104 @@
     .cat-card.musica .cat-arrow svg    { color: var(--c-musica); }
     .cat-card.libros .cat-arrow svg    { color: #D4A21F; }
 
-    /* ============================================================
-       SECCIÓN ÚLTIMAS RECOMENDACIONES
-       ============================================================ */
     .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: var(--s-4);
     }
     .section-head h2 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 22px;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: var(--s-2);
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 22px; margin: 0;
+      display: flex; align-items: center; gap: var(--s-2);
     }
     .section-head h2 svg { width: 22px; height: 22px; color: var(--c-libros); }
     .section-head a {
-      color: var(--c-action);
-      font-weight: 600;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      color: var(--c-action); font-weight: 600; font-size: 14px;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-
-    .recs-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--s-3);
-      margin-bottom: var(--s-5);
+    .recs-carousel {
+      display: flex; gap: var(--s-3);
+      overflow-x: auto; overflow-y: visible;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 0 var(--s-5);
+      margin: 0 calc(-1 * var(--s-4)) 0;
+      padding-left: var(--s-4); padding-right: var(--s-4);
+      scrollbar-width: none;
     }
+    .recs-carousel::-webkit-scrollbar { display: none; }
+    .recs-carousel .rec-card { flex: 0 0 168px; scroll-snap-align: start; }
 
     .rec-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: var(--s-3);
-      box-shadow: var(--shadow-card);
-      display: flex;
-      flex-direction: column;
-      gap: var(--s-2);
+      background: var(--surface); border-radius: var(--radius);
+      padding: var(--s-3); box-shadow: var(--shadow-card);
+      display: flex; flex-direction: column; gap: var(--s-2);
       transition: transform 0.2s ease;
     }
     .rec-card:active { transform: scale(0.98); }
-
     .rec-poster {
-      width: 100%;
-      aspect-ratio: 2/3;
+      width: 100%; aspect-ratio: 2/3;
       border-radius: var(--radius-sm);
       background: var(--gray-50);
-      object-fit: cover;
-      display: block;
+      object-fit: cover; display: block;
     }
     .rec-poster-ph {
-      width: 100%;
-      aspect-ratio: 2/3;
+      width: 100%; aspect-ratio: 2/3;
       border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      opacity: 0.7;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; opacity: 0.7;
     }
     .rec-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 1.25;
-      margin: 0;
-      color: var(--ink);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 16px; line-height: 1.25; margin: 0;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
 
     .badge {
-      display: inline-flex;
-      align-self: flex-start;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      font-size: 12px;
-      font-weight: 600;
+      display: inline-flex; align-self: flex-start;
+      padding: 4px 10px; border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 600;
     }
     .badge.peliculas { background: var(--c-peliculas-soft); color: #C2453B; }
     .badge.series    { background: var(--c-series-soft);    color: #2A5FB8; }
     .badge.musica    { background: var(--c-musica-soft);    color: #6B4FAE; }
     .badge.libros    { background: var(--c-libros-soft);    color: #B8841A; }
 
-    .rec-rating {
-      display: flex;
-      gap: 2px;
-    }
+    .rec-rating { display: flex; gap: 2px; }
     .rec-rating svg { width: 14px; height: 14px; color: var(--c-libros); }
     .rec-rating svg.empty { color: var(--gray-100); }
 
     .rec-author {
-      display: flex;
-      align-items: center;
-      gap: var(--s-2);
+      display: flex; align-items: center; gap: var(--s-2);
       padding-top: var(--s-2);
       border-top: 1px solid var(--gray-100);
-      font-size: 12px;
-      color: var(--ink-soft);
+      font-size: 12px; color: var(--ink-soft);
     }
     .avatar {
-      width: 24px;
-      height: 24px;
+      width: 24px; height: 24px;
       border-radius: 50%;
       background: var(--c-action);
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
       flex-shrink: 0;
     }
     .avatar.lg { width: 40px; height: 40px; font-size: 16px; }
 
-    /* ============================================================
-       BOTTOM NAVIGATION
-       ============================================================ */
+    .rec-list { display: flex; flex-direction: column; gap: var(--s-3); }
+    .rec-list .rec-card { flex-direction: row; gap: var(--s-3); padding: var(--s-3); }
+    .rec-list .rec-poster, .rec-list .rec-poster-ph {
+      width: 80px; flex-shrink: 0;
+    }
+    .rec-list .rec-body { flex: 1; display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+    .rec-list .rec-author { border-top: none; padding-top: 0; }
+    .rec-list .rec-title { font-size: 17px; }
+
     .nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
+      position: fixed; bottom: 0; left: 50%;
       transform: translateX(-50%);
-      width: 100%;
-      max-width: var(--max-w);
+      width: 100%; max-width: var(--max-w);
       background: var(--surface);
       border-top-left-radius: var(--radius);
       border-top-right-radius: var(--radius);
@@ -386,185 +274,336 @@
       box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-      align-items: end;
-      z-index: 50;
+      align-items: end; z-index: 50;
     }
     .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: var(--s-2) 0;
-      font-size: 11px;
-      font-weight: 500;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: var(--s-2) 0;
+      font-size: 11px; font-weight: 500;
       color: var(--ink-soft);
       transition: color 0.2s;
     }
     .nav-item svg { width: 24px; height: 24px; }
     .nav-item.active { color: var(--c-action); }
-    .nav-item.peliculas-color.active { color: var(--c-peliculas); }
-    .nav-item.musica-color.active    { color: var(--c-musica); }
-    .nav-item.libros-color.active    { color: #D4A21F; }
-    .nav-item.bromendators-color.active { color: var(--c-peliculas); }
-    .nav-item.perfil-color.active    { color: var(--c-series); }
 
-    /* Botón central destacado: Recomendar */
     .nav-cta {
       grid-column: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      transform: translateY(-12px);
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; transform: translateY(-8px);
     }
     .nav-cta-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--c-action);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(46, 139, 108, 0.4);
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--c-action); color: white;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(46, 139, 108, 0.35);
       transition: transform 0.2s;
     }
     .nav-cta-btn:active { transform: scale(0.92); }
-    .nav-cta-btn svg { width: 28px; height: 28px; }
-    .nav-cta-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--c-action);
-    }
+    .nav-cta-btn svg { width: 24px; height: 24px; }
+    .nav-cta-label { font-size: 11px; font-weight: 600; color: var(--c-action); }
 
-    /* ============================================================
-       PANTALLAS INTERIORES (placeholders Fase 1)
-       ============================================================ */
     .screen-header {
       margin-bottom: var(--s-5);
+      display: flex; align-items: center; gap: var(--s-3);
     }
+    .screen-header .back-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface); box-shadow: var(--shadow-soft);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .screen-header .back-btn svg { width: 18px; height: 18px; }
+    .screen-header .title-block { flex: 1; min-width: 0; }
     .screen-header h1 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 32px;
-      margin: 0 0 var(--s-2);
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 28px; margin: 0 0 2px;
       letter-spacing: -0.5px;
     }
-    .screen-header p {
-      color: var(--ink-soft);
-      font-size: 15px;
-      margin: 0;
-    }
+    .screen-header p { color: var(--ink-soft); font-size: 14px; margin: 0; }
 
     .placeholder-box {
-      background: var(--surface);
-      border-radius: var(--radius);
+      background: var(--surface); border-radius: var(--radius);
       padding: var(--s-6) var(--s-5);
-      text-align: center;
-      box-shadow: var(--shadow-card);
+      text-align: center; box-shadow: var(--shadow-card);
       color: var(--ink-soft);
     }
     .placeholder-box .ph-emoji { font-size: 48px; margin-bottom: var(--s-3); }
     .placeholder-box h3 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      color: var(--ink);
-      margin: 0 0 var(--s-2);
-      font-size: 20px;
+      font-family: var(--font-display); font-weight: 700;
+      color: var(--ink); margin: 0 0 var(--s-2); font-size: 20px;
     }
     .placeholder-box p { margin: 0; font-size: 14px; line-height: 1.6; }
 
-    /* ============================================================
-       SELECTOR DE USUARIO (cuando no hay user en URL)
-       ============================================================ */
     .user-picker {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 100;
+      position: fixed; inset: 0;
+      background: var(--bg); z-index: 100;
       display: none;
-      align-items: center;
-      justify-content: center;
+      align-items: center; justify-content: center;
       padding: var(--s-5);
     }
     .user-picker.show { display: flex; }
-    .user-picker-inner {
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-    }
+    .user-picker-inner { max-width: 420px; width: 100%; text-align: center; }
     .user-picker h1 {
-      font-family: var(--font-display);
-      font-size: 36px;
-      margin: 0 0 var(--s-2);
-      letter-spacing: -0.5px;
+      font-family: var(--font-display); font-size: 36px;
+      margin: 0 0 var(--s-2); letter-spacing: -0.5px;
     }
     .user-picker .accent {
+      background: linear-gradient(135deg, var(--c-peliculas), var(--c-musica));
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent;
+    }
+    .user-picker p { color: var(--ink-soft); margin: 0 0 var(--s-6); }
+    .user-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
+    .user-pill {
+      background: var(--surface); border-radius: var(--radius);
+      padding: var(--s-4) var(--s-2); box-shadow: var(--shadow-soft);
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--s-2);
+      transition: transform 0.2s;
+    }
+    .user-pill:active { transform: scale(0.96); }
+    .user-pill .avatar.lg { width: 56px; height: 56px; font-size: 22px; }
+    .user-pill span { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+    .form-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: var(--s-4); box-shadow: var(--shadow-card);
+      margin-bottom: var(--s-4);
+    }
+    .form-group { margin-bottom: var(--s-4); }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--ink); margin-bottom: var(--s-2);
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: var(--s-3);
+      border: 1.5px solid var(--gray-100);
+      border-radius: var(--radius-sm);
+      background: var(--bg); color: var(--ink);
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none; border-color: var(--c-action);
+    }
+    .form-textarea { min-height: 90px; resize: vertical; font-family: inherit; }
+
+    .cat-picker {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2);
+    }
+    .cat-pick-btn {
+      padding: var(--s-3); border-radius: var(--radius-sm);
+      border: 2px solid var(--gray-100); background: var(--surface);
+      display: flex; align-items: center; gap: var(--s-2);
+      font-weight: 600; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .cat-pick-btn .cat-emoji { font-size: 20px; }
+    .cat-pick-btn[data-cat="peliculas"][aria-pressed="true"] { background: var(--c-peliculas-soft); border-color: var(--c-peliculas); color: #4A1D19; }
+    .cat-pick-btn[data-cat="series"][aria-pressed="true"]    { background: var(--c-series-soft); border-color: var(--c-series); color: #14306B; }
+    .cat-pick-btn[data-cat="musica"][aria-pressed="true"]    { background: var(--c-musica-soft); border-color: var(--c-musica); color: #322657; }
+    .cat-pick-btn[data-cat="libros"][aria-pressed="true"]    { background: var(--c-libros-soft); border-color: var(--c-libros); color: #5C3E0A; }
+
+    .subcat-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+    .subcat-btn {
+      padding: 6px 14px; border-radius: var(--radius-pill);
+      border: 1.5px solid var(--gray-100); background: var(--surface);
+      font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .subcat-btn[aria-pressed="true"] {
+      border-color: var(--c-musica);
+      background: var(--c-musica-soft);
+      color: #322657;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px var(--s-4);
+      border-radius: var(--radius-pill);
+      background: var(--c-action); color: white;
+      font-weight: 600; font-size: 16px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-ghost {
+      padding: var(--s-2) var(--s-3);
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--ink-soft);
+      font-weight: 500; font-size: 14px;
+    }
+
+    .detail-hero {
+      background: var(--surface); border-radius: var(--radius);
+      padding: var(--s-4); box-shadow: var(--shadow-card);
+      margin-bottom: var(--s-4);
+      display: flex; gap: var(--s-4);
+    }
+    .detail-poster, .detail-poster-ph {
+      width: 110px; aspect-ratio: 2/3;
+      border-radius: var(--radius-sm); flex-shrink: 0;
+    }
+    .detail-poster { object-fit: cover; }
+    .detail-poster-ph {
+      background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+    }
+    .detail-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+    .detail-title {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 22px; line-height: 1.2; margin: 0;
+    }
+    .detail-meta { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+
+    .detail-section {
+      background: var(--surface); border-radius: var(--radius);
+      padding: var(--s-4); box-shadow: var(--shadow-card);
+      margin-bottom: var(--s-4);
+    }
+    .detail-section h3 {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 18px; margin: 0 0 var(--s-3);
+    }
+    .detail-section p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+    .detail-section p + p { margin-top: var(--s-2); }
+
+    .reactions {
+      display: flex; gap: var(--s-3); margin-bottom: var(--s-3);
+    }
+    .react-btn {
+      flex: 1;
+      padding: var(--s-3);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      border: 1.5px solid var(--gray-100);
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--s-2);
+      font-weight: 500; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .react-btn svg { width: 18px; height: 18px; }
+    .react-btn[aria-pressed="true"].like {
+      background: #E8F5EF; border-color: var(--c-action); color: var(--c-action);
+    }
+    .react-btn[aria-pressed="true"].dislike {
+      background: #FDECEA; border-color: var(--c-danger); color: var(--c-danger);
+    }
+    .react-counts {
+      display: flex; gap: var(--s-3) var(--s-4);
+      flex-wrap: wrap;
+      font-size: 12px; color: var(--ink-soft);
+    }
+    .react-count-group { display: flex; align-items: center; gap: 6px; }
+    .react-count-avatars { display: flex; }
+    .react-count-avatars .avatar { width: 22px; height: 22px; font-size: 9px; margin-left: -6px; border: 2px solid var(--surface); }
+    .react-count-avatars .avatar:first-child { margin-left: 0; }
+
+    .stars-input {
+      display: flex; gap: 4px;
+      justify-content: center; margin-bottom: var(--s-3);
+    }
+    .star-btn { padding: 4px; }
+    .star-btn svg { width: 32px; height: 32px; color: var(--gray-100); transition: color 0.15s; }
+    .star-btn[data-on="true"] svg { color: var(--c-libros); }
+
+    .toast {
+      position: fixed; bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--ink); color: white;
+      padding: var(--s-3) var(--s-4);
+      border-radius: var(--radius-pill);
+      font-size: 14px; font-weight: 500;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      max-width: 90%; text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.error { background: var(--c-danger); }
+    .toast.success { background: var(--c-action); }
+
+    .loading-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--c-action);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+      z-index: 200;
+    }
+    .loading-bar.show { transform: scaleX(0.7); }
+    .loading-bar.done { transform: scaleX(1); transition: transform 0.2s; }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--s-6) var(--s-4);
+      color: var(--ink-soft);
+    }
+    .empty-state .emoji { font-size: 48px; margin-bottom: var(--s-3); }
+    .empty-state h3 {
+      font-family: var(--font-display);
+      color: var(--ink); margin: 0 0 var(--s-2);
+    }
+
+    .splash {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.4s;
+    }
+    .splash.hide { opacity: 0; pointer-events: none; }
+    .splash-content { text-align: center; }
+    .splash h1 {
+      font-family: var(--font-display);
+      font-size: 38px; margin: 0 0 var(--s-3);
+      letter-spacing: -0.5px;
+    }
+    .splash .accent {
       background: linear-gradient(135deg, var(--c-peliculas), var(--c-musica));
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
-    .user-picker p { color: var(--ink-soft); margin: 0 0 var(--s-6); }
+    .splash-spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--gray-100);
+      border-top-color: var(--c-action);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .user-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--s-3);
-    }
-    .user-pill {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: var(--s-4) var(--s-2);
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--s-2);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .user-pill:active { transform: scale(0.96); }
-    .user-pill .avatar.lg { width: 56px; height: 56px; font-size: 22px; }
-    .user-pill span {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    /* ============================================================
-       LISTA DE RECOMENDACIONES (vista categoría)
-       ============================================================ */
-    .rec-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--s-3);
-    }
-    .rec-list .rec-card {
-      flex-direction: row;
-      gap: var(--s-3);
-      padding: var(--s-3);
-    }
-    .rec-list .rec-poster, .rec-list .rec-poster-ph {
-      width: 80px;
-      flex-shrink: 0;
-    }
-    .rec-list .rec-body { flex: 1; display: flex; flex-direction: column; gap: var(--s-2); }
-    .rec-list .rec-author { border-top: none; padding-top: 0; }
-
-    /* ============================================================
-       RESPONSIVE
-       ============================================================ */
     @media (min-width: 720px) {
       .home-header h1 { font-size: 42px; }
-      .cat-name { font-size: 26px; }
+      .cat-name { font-size: 22px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ============================================================
-       SELECTOR DE USUARIO (overlay)
-       ============================================================ -->
+  <div class="splash" id="splash">
+    <div class="splash-content">
+      <h1><span class="accent">BROmendations</span></h1>
+      <div class="splash-spinner"></div>
+    </div>
+  </div>
+
+  <div class="loading-bar" id="loadingBar"></div>
+  <div class="toast" id="toast"></div>
+
   <div class="user-picker" id="userPicker">
     <div class="user-picker-inner">
       <h1>Bienvenid@ a <span class="accent">BROmendations</span></h1>
@@ -573,82 +612,62 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       APP
-       ============================================================ -->
   <div class="app" id="app">
 
-    <!-- ===================== INICIO ===================== -->
     <section class="screen" id="screen-home">
       <header class="home-header">
         <div class="deco" aria-hidden="true"></div>
-        <h1>¡Hola <span id="userName">Nico</span>! <span class="wave">👋</span></h1>
+        <h1>¡Hola <span id="userName">...</span>! <span class="wave">👋</span></h1>
         <p>Descubre y comparte recomendaciones culturales en familia</p>
       </header>
 
       <div class="categories">
         <a href="#/categoria/peliculas" class="cat-card peliculas">
           <div class="cat-card-head">
-            <div class="cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L4 4h4l1.5 3M9.5 7L11 4h4l1.5 3M16.5 7L18 4h4M2 7h20v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg>
-            </div>
-            <div>
+            <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L4 4h4l1.5 3M9.5 7L11 4h4l1.5 3M16.5 7L18 4h4M2 7h20v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg></div>
+            <div class="cat-card-text">
               <div class="cat-name">Películas</div>
-              <div class="cat-count" id="count-peliculas">0 recomendaciones</div>
+              <div class="cat-count" id="count-peliculas">— recs</div>
             </div>
           </div>
           <div class="cat-art">🍿</div>
-          <div class="cat-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
+          <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
         <a href="#/categoria/series" class="cat-card series">
           <div class="cat-card-head">
-            <div class="cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M7 3l5 4 5-4"/></svg>
-            </div>
-            <div>
+            <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M7 3l5 4 5-4"/></svg></div>
+            <div class="cat-card-text">
               <div class="cat-name">Series</div>
-              <div class="cat-count" id="count-series">0 recomendaciones</div>
+              <div class="cat-count" id="count-series">— recs</div>
             </div>
           </div>
           <div class="cat-art">📺</div>
-          <div class="cat-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
+          <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
         <a href="#/categoria/musica" class="cat-card musica">
           <div class="cat-card-head">
-            <div class="cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-            </div>
-            <div>
+            <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+            <div class="cat-card-text">
               <div class="cat-name">Música</div>
-              <div class="cat-count" id="count-musica">0 recomendaciones</div>
+              <div class="cat-count" id="count-musica">— recs</div>
             </div>
           </div>
           <div class="cat-art">🎧</div>
-          <div class="cat-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
+          <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
         <a href="#/categoria/libros" class="cat-card libros">
           <div class="cat-card-head">
-            <div class="cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
-            </div>
-            <div>
+            <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+            <div class="cat-card-text">
               <div class="cat-name">Libros</div>
-              <div class="cat-count" id="count-libros">0 recomendaciones</div>
+              <div class="cat-count" id="count-libros">— recs</div>
             </div>
           </div>
           <div class="cat-art">📚</div>
-          <div class="cat-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
+          <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
       </div>
 
@@ -656,78 +675,133 @@
         <h2><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg> Últimas recomendaciones</h2>
         <a href="#/novedades">Ver todas <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
       </div>
-
-      <div class="recs-row" id="recsRow"></div>
+      <div class="recs-carousel" id="recsRow"></div>
     </section>
 
-    <!-- ===================== MI BIBLIOTECA ===================== -->
     <section class="screen" id="screen-biblioteca">
       <header class="screen-header">
-        <h1>Mi biblioteca</h1>
-        <p>Todo lo que has consumido y valorado</p>
+        <div class="title-block">
+          <h1>Mi biblioteca</h1>
+          <p>Lo que has consumido y valorado</p>
+        </div>
       </header>
-      <div class="placeholder-box">
-        <div class="ph-emoji">📖</div>
-        <h3>Aún sin contenido</h3>
-        <p>Cuando valores recomendaciones aparecerán aquí. Pendiente de Fase 2.</p>
-      </div>
+      <div id="bibliotecaList"></div>
     </section>
 
-    <!-- ===================== RECOMENDAR ===================== -->
     <section class="screen" id="screen-recomendar">
       <header class="screen-header">
-        <h1>Recomendar</h1>
-        <p>Comparte algo que te haya gustado con la familia</p>
+        <div class="title-block">
+          <h1>Recomendar</h1>
+          <p>Comparte algo que te haya gustado</p>
+        </div>
       </header>
-      <div class="placeholder-box">
-        <div class="ph-emoji">✨</div>
-        <h3>Formulario en construcción</h3>
-        <p>Aquí elegirás categoría, subcategoría, título y comentario. La info se enriquecerá con IA. Pendiente de Fase 2.</p>
+      <div class="form-card">
+        <div class="form-group">
+          <label class="form-label">¿Qué tipo de recomendación?</label>
+          <div class="cat-picker" id="catPicker">
+            <button class="cat-pick-btn" data-cat="peliculas" aria-pressed="false"><span class="cat-emoji">🎬</span> Película</button>
+            <button class="cat-pick-btn" data-cat="series" aria-pressed="false"><span class="cat-emoji">📺</span> Serie</button>
+            <button class="cat-pick-btn" data-cat="musica" aria-pressed="false"><span class="cat-emoji">🎧</span> Música</button>
+            <button class="cat-pick-btn" data-cat="libros" aria-pressed="false"><span class="cat-emoji">📚</span> Libro</button>
+          </div>
+        </div>
+
+        <div class="form-group" id="subcatGroup" style="display:none;">
+          <label class="form-label">Tipo de música</label>
+          <div class="subcat-row" id="subcatRow">
+            <button class="subcat-btn" data-subcat="cancion" aria-pressed="false">Canción</button>
+            <button class="subcat-btn" data-subcat="album" aria-pressed="false">Álbum</button>
+            <button class="subcat-btn" data-subcat="artista" aria-pressed="false">Artista</button>
+            <button class="subcat-btn" data-subcat="concierto" aria-pressed="false">Concierto</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="recTitulo">Título</label>
+          <input type="text" id="recTitulo" class="form-input" placeholder="Ej: Cien años de soledad">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="recComentario">Tu comentario <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span></label>
+          <textarea id="recComentario" class="form-textarea" placeholder="¿Qué te ha gustado? ¿A quién se la recomendarías?"></textarea>
+        </div>
+
+        <button class="btn-primary" id="submitRec">Compartir recomendación</button>
       </div>
     </section>
 
-    <!-- ===================== BROMENDATORS ===================== -->
     <section class="screen" id="screen-bromendators">
       <header class="screen-header">
-        <h1>Bromendators</h1>
-        <p>Conoce a la familia recomendadora</p>
+        <div class="title-block">
+          <h1>Bromendators</h1>
+          <p>Conoce a la familia recomendadora</p>
+        </div>
       </header>
       <div id="bromendatorsList"></div>
     </section>
 
-    <!-- ===================== MI PERFIL ===================== -->
     <section class="screen" id="screen-perfil">
       <header class="screen-header">
-        <h1>Mi perfil</h1>
-        <p>Tu actividad y ajustes</p>
+        <div class="title-block">
+          <h1>Mi perfil</h1>
+          <p id="perfilSubtitle">Tu actividad</p>
+        </div>
       </header>
-      <div class="placeholder-box">
-        <div class="ph-emoji">👤</div>
-        <h3>Perfil personal</h3>
-        <p>Aquí verás tus recomendaciones, valoraciones y opciones de admin. Pendiente de Fase 2.</p>
-      </div>
+      <div id="perfilContent"></div>
     </section>
 
-    <!-- ===================== CATEGORÍA (genérica) ===================== -->
     <section class="screen" id="screen-categoria">
       <header class="screen-header">
-        <h1 id="catTitle">Categoría</h1>
-        <p id="catSubtitle">Recomendaciones de la familia</p>
+        <button class="back-btn" onclick="history.back()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title-block">
+          <h1 id="catTitle">Categoría</h1>
+          <p id="catSubtitle">Recomendaciones</p>
+        </div>
       </header>
       <div class="rec-list" id="catList"></div>
     </section>
 
+    <section class="screen" id="screen-novedades">
+      <header class="screen-header">
+        <button class="back-btn" onclick="history.back()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title-block">
+          <h1>Novedades</h1>
+          <p>Todas las recomendaciones por fecha</p>
+        </div>
+      </header>
+      <div class="rec-list" id="novedadesList"></div>
+    </section>
+
+    <section class="screen" id="screen-rec">
+      <header class="screen-header">
+        <button class="back-btn" onclick="history.back()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title-block">
+          <h1>Recomendación</h1>
+          <p id="recDetailMeta"></p>
+        </div>
+      </header>
+      <div id="recDetailContent"></div>
+    </section>
+
+    <section class="screen" id="screen-bromendator">
+      <header class="screen-header">
+        <button class="back-btn" onclick="history.back()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title-block">
+          <h1 id="bromendatorName">...</h1>
+          <p id="bromendatorMeta">...</p>
+        </div>
+      </header>
+      <div id="bromendatorContent"></div>
+    </section>
+
   </div>
 
-  <!-- ============================================================
-       BOTTOM NAVIGATION
-       ============================================================ -->
   <nav class="nav" id="bottomNav">
     <a href="#/" class="nav-item" data-screen="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
       Inicio
     </a>
-    <a href="#/biblioteca" class="nav-item musica-color" data-screen="biblioteca">
+    <a href="#/biblioteca" class="nav-item" data-screen="biblioteca">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h3v16H4zM10 4h3v16h-3zM17 6l3 1-3 14-3-1z"/></svg>
       Mi biblioteca
     </a>
@@ -737,121 +811,194 @@
       </a>
       <span class="nav-cta-label">Recomendar</span>
     </div>
-    <a href="#/bromendators" class="nav-item bromendators-color" data-screen="bromendators">
+    <a href="#/bromendators" class="nav-item" data-screen="bromendators">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2.5 2-5 5-5"/></svg>
       Bromendators
     </a>
-    <a href="#/perfil" class="nav-item perfil-color" data-screen="perfil">
+    <a href="#/perfil" class="nav-item" data-screen="perfil">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
       Mi perfil
     </a>
   </nav>
 
   <script>
-    /* ============================================================
-       CONFIGURACIÓN
-       ============================================================ */
-    const APP_VERSION = '0.1.0';
-
-    // Lista de usuarios. En Fase 2 vendrá del Sheet.
-    const USERS = [
-      { username: 'nico',    nombre: 'Nico',    color: '#FF8A80', admin: true },
-      { username: 'andres',  nombre: 'Andrés',  color: '#6BA4FF', admin: false },
-      { username: 'juampa',  nombre: 'Juampa',  color: '#B99AE6', admin: false },
-      { username: 'seba',    nombre: 'Seba',    color: '#FFC857', admin: false },
-      { username: 'pao',     nombre: 'Pao',     color: '#2E8B6C', admin: false },
-      { username: 'papi',    nombre: 'Papi',    color: '#C2453B', admin: false },
-    ];
+    /* ========== CONFIG ========== */
+    const APP_VERSION = '0.2.0';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
-      peliculas: { nombre: 'Películas', emoji: '🍿', color: 'peliculas' },
-      series:    { nombre: 'Series',    emoji: '📺', color: 'series' },
-      musica:    { nombre: 'Música',    emoji: '🎧', color: 'musica' },
-      libros:    { nombre: 'Libros',    emoji: '📚', color: 'libros' },
+      peliculas: { nombre: 'Películas', singular: 'Película', emoji: '🍿', color: 'peliculas' },
+      series:    { nombre: 'Series',    singular: 'Serie',    emoji: '📺', color: 'series' },
+      musica:    { nombre: 'Música',    singular: 'Música',   emoji: '🎧', color: 'musica' },
+      libros:    { nombre: 'Libros',    singular: 'Libro',    emoji: '📚', color: 'libros' },
     };
 
-    // Datos mock para Fase 1. En Fase 2 vendrán del Sheet.
-    const MOCK_RECOMENDACIONES = [
-      { id: 1, autor: 'pao',    categoria: 'peliculas', titulo: 'Dune: Parte dos',      rating: 4.5, ts: Date.now() - 86400000 },
-      { id: 2, autor: 'papi',   categoria: 'libros',    titulo: 'Cien años de soledad', rating: 5.0, ts: Date.now() - 2 * 86400000 },
-      { id: 3, autor: 'andres', categoria: 'series',    titulo: 'Severance',            rating: 5.0, ts: Date.now() - 3 * 86400000 },
-      { id: 4, autor: 'juampa', categoria: 'musica',    titulo: 'Bad Bunny - DeBÍ TiRAR MáS FOToS', rating: 4.0, ts: Date.now() - 4 * 86400000 },
-      { id: 5, autor: 'seba',   categoria: 'peliculas', titulo: 'Anatomía de una caída', rating: 4.5, ts: Date.now() - 5 * 86400000 },
-      { id: 6, autor: 'nico',   categoria: 'libros',    titulo: 'Tokio blues',          rating: 4.0, ts: Date.now() - 6 * 86400000 },
-    ];
-
-    /* ============================================================
-       ESTADO
-       ============================================================ */
+    /* ========== STATE ========== */
     const state = {
       currentUser: null,
-      route: '#/',
+      data: { usuarios: [], recomendaciones: [], valoraciones: [], reacciones: [], consumido: [] },
+      formNew: { categoria: null, subcategoria: null },
     };
 
-    /* ============================================================
-       UTILIDADES
-       ============================================================ */
+    /* ========== API ========== */
+    function apiUrl(action, params = {}) {
+      const url = new URL(API_URL);
+      url.searchParams.set('action', action);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) url.searchParams.set(k, v);
+      });
+      return url.toString();
+    }
+    async function apiGet(action, params = {}) {
+      showLoading();
+      try {
+        const res = await fetch(apiUrl(action, params), { method: 'GET' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error en la API');
+        return json;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /* ========== CACHE ========== */
+    const CACHE_KEY = 'br_data_cache_v1';
+    function loadFromCache() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        return (p && p.data) ? p : null;
+      } catch { return null; }
+    }
+    function saveToCache(data) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+    }
+
+    /* ========== LOAD ========== */
+    async function loadData({ silent = false } = {}) {
+      const cached = loadFromCache();
+      if (cached && cached.data) state.data = cached.data;
+      try {
+        const json = await apiGet('getAll');
+        state.data = {
+          usuarios:        json.usuarios || [],
+          recomendaciones: json.recomendaciones || [],
+          valoraciones:    json.valoraciones || [],
+          reacciones:      json.reacciones || [],
+          consumido:       json.consumido || [],
+        };
+        saveToCache(state.data);
+      } catch (err) {
+        if (!silent) toast('Sin conexión. Mostrando datos guardados.', 'error');
+        if (!cached) state.data = { usuarios: [], recomendaciones: [], valoraciones: [], reacciones: [], consumido: [] };
+      }
+    }
+
+    /* ========== UTILS ========== */
     function getUserBy(username) {
-      return USERS.find(u => u.username === username);
+      return state.data.usuarios.find(u => u.username === username);
     }
     function getInitials(nombre) {
-      return nombre.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
+      if (!nombre) return '?';
+      return String(nombre).split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
     }
     function avatarHTML(username, size = '') {
       const u = getUserBy(username);
-      if (!u) return '';
-      return `<div class="avatar ${size}" style="background:${u.color}">${getInitials(u.nombre)}</div>`;
+      if (!u) return `<div class="avatar ${size}">?</div>`;
+      const color = u.color || '#888';
+      return `<div class="avatar ${size}" style="background:${color}">${getInitials(u.nombre)}</div>`;
     }
-    function starRating(rating) {
+    function getRecValoraciones(recId) { return state.data.valoraciones.filter(v => v.recomendacion_id === recId); }
+    function getRecReacciones(recId)   { return state.data.reacciones.filter(r => r.recomendacion_id === recId); }
+    function getRecAvgRating(recId) {
+      const v = getRecValoraciones(recId);
+      if (!v.length) return 0;
+      return v.reduce((a, x) => a + parseFloat(x.estrellas || 0), 0) / v.length;
+    }
+    function getMyRating(recId)   { return state.data.valoraciones.find(v => v.recomendacion_id === recId && v.usuario === state.currentUser); }
+    function getMyReaction(recId) { return state.data.reacciones.find(r => r.recomendacion_id === recId && r.usuario === state.currentUser); }
+    function escapeHTML(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      const today = new Date();
+      const diff = (today - d) / (1000 * 60 * 60 * 24);
+      if (diff < 1) return 'Hoy';
+      if (diff < 2) return 'Ayer';
+      if (diff < 7) return `Hace ${Math.floor(diff)} días`;
+      return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    }
+    function starRating(rating, size = 14) {
       let html = '<div class="rec-rating">';
       for (let i = 1; i <= 5; i++) {
         const filled = i <= Math.floor(rating);
         const half = !filled && i - 0.5 <= rating;
-        html += `<svg viewBox="0 0 24 24" fill="${filled || half ? 'currentColor' : 'none'}" stroke="currentColor" class="${filled || half ? '' : 'empty'}" stroke-width="1.5"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg>`;
+        const cls = filled || half ? '' : 'empty';
+        html += `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="${filled || half ? 'currentColor' : 'none'}" stroke="currentColor" class="${cls}" stroke-width="1.5"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg>`;
       }
-      html += '</div>';
-      return html;
+      return html + '</div>';
     }
 
-    /* ============================================================
-       USER PICKER
-       ============================================================ */
+    /* ========== UI HELPERS ========== */
+    let toastTimer;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.className = 'toast ' + type; }, 2800);
+    }
+    function showLoading() {
+      document.getElementById('loadingBar').className = 'loading-bar show';
+    }
+    function hideLoading() {
+      const bar = document.getElementById('loadingBar');
+      bar.className = 'loading-bar done';
+      setTimeout(() => { bar.className = 'loading-bar'; }, 250);
+    }
+    function emptyStateHTML(emoji, title, msg) {
+      return `<div class="empty-state"><div class="emoji">${emoji}</div><h3>${title}</h3><p>${msg}</p></div>`;
+    }
+
+    /* ========== USER PICKER ========== */
     function showUserPicker() {
       const grid = document.getElementById('userGrid');
-      grid.innerHTML = USERS.map(u => `
-        <button class="user-pill" data-username="${u.username}">
-          <div class="avatar lg" style="background:${u.color}">${getInitials(u.nombre)}</div>
-          <span>${u.nombre}</span>
-        </button>
-      `).join('');
-      grid.querySelectorAll('.user-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const username = btn.dataset.username;
-          localStorage.setItem('br_user', username);
-          location.hash = `#/u/${username}`;
-          document.getElementById('userPicker').classList.remove('show');
-          initApp();
+      const usuarios = (state.data.usuarios || []).filter(u => String(u.activo).toUpperCase() !== 'FALSE');
+      if (!usuarios.length) {
+        grid.innerHTML = '<p style="color:var(--c-danger); grid-column: 1/-1;">No se pudieron cargar usuarios. Revisa la conexión.</p>';
+      } else {
+        grid.innerHTML = usuarios.map(u => `
+          <button class="user-pill" data-username="${u.username}">
+            <div class="avatar lg" style="background:${u.color || '#888'}">${getInitials(u.nombre)}</div>
+            <span>${u.nombre}</span>
+          </button>
+        `).join('');
+        grid.querySelectorAll('.user-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const username = btn.dataset.username;
+            localStorage.setItem('br_user', username);
+            state.currentUser = username;
+            location.hash = `#/u/${username}`;
+            document.getElementById('userPicker').classList.remove('show');
+            navigate();
+          });
         });
-      });
+      }
       document.getElementById('userPicker').classList.add('show');
     }
 
-    /* ============================================================
-       ROUTING
-       ============================================================ */
+    /* ========== ROUTING ========== */
     function parseRoute(hash) {
-      // formatos:
-      // #/                            → home
-      // #/u/nico                      → home con user
-      // #/u/nico/biblioteca           → con user
-      // #/biblioteca                  → sin user (usa state.currentUser)
-      // #/categoria/peliculas         → categoría
-      const clean = hash.replace(/^#/, '').replace(/^\//, '');
+      const clean = (hash || '').replace(/^#/, '').replace(/^\//, '');
       const parts = clean.split('/').filter(Boolean);
-
       let user = null;
       let path = parts;
-
       if (parts[0] === 'u' && parts[1]) {
         user = parts[1];
         path = parts.slice(2);
@@ -861,71 +1008,70 @@
       return { user, screen, param };
     }
 
-    function navigate() {
+    async function navigate() {
       const { user, screen, param } = parseRoute(location.hash);
-
-      // Si la URL trae user, lo guardamos
       if (user && getUserBy(user)) {
         state.currentUser = user;
         localStorage.setItem('br_user', user);
       }
-
       if (!state.currentUser) {
         showUserPicker();
         return;
       }
-
-      // Mostrar pantalla
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const screenEl = document.getElementById(`screen-${screen}`);
-      if (screenEl) {
-        screenEl.classList.add('active');
-      } else {
-        document.getElementById('screen-home').classList.add('active');
-      }
+      const el = document.getElementById(`screen-${screen}`);
+      if (el) el.classList.add('active');
+      else document.getElementById('screen-home').classList.add('active');
 
-      // Render bottom nav activo
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      const activeNav = document.querySelector(`.nav-item[data-screen="${screen}"]`);
-      if (activeNav) activeNav.classList.add('active');
+      const a = document.querySelector(`.nav-item[data-screen="${screen}"]`);
+      if (a) a.classList.add('active');
 
-      // Render específico de pantalla
-      if (screen === 'home')         renderHome();
-      if (screen === 'bromendators') renderBromendators();
-      if (screen === 'categoria' && param) renderCategoria(param);
-
+      switch (screen) {
+        case 'home':         renderHome(); break;
+        case 'biblioteca':   renderBiblioteca(); break;
+        case 'recomendar':   renderRecomendar(); break;
+        case 'bromendators': renderBromendators(); break;
+        case 'perfil':       renderPerfil(); break;
+        case 'categoria':    renderCategoria(param); break;
+        case 'novedades':    renderNovedades(); break;
+        case 'rec':          renderRecDetail(param); break;
+        case 'bromendator':  renderBromendator(param); break;
+      }
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
-    /* ============================================================
-       RENDER: HOME
-       ============================================================ */
+    /* ========== RENDER: HOME ========== */
     function renderHome() {
       const u = getUserBy(state.currentUser);
       if (u) document.getElementById('userName').textContent = u.nombre;
-
-      // Contadores por categoría
       Object.keys(CATEGORIES).forEach(cat => {
-        const count = MOCK_RECOMENDACIONES.filter(r => r.categoria === cat).length;
+        const count = state.data.recomendaciones.filter(r => r.categoria === cat).length;
         const el = document.getElementById(`count-${cat}`);
-        if (el) el.textContent = `${count} recomendacion${count === 1 ? '' : 'es'}`;
+        if (el) el.textContent = count === 1 ? '1 recomendación' : `${count} recomendaciones`;
       });
-
-      // Últimas 2 recomendaciones
-      const recs = [...MOCK_RECOMENDACIONES].sort((a, b) => b.ts - a.ts).slice(0, 2);
+      const recs = [...state.data.recomendaciones]
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 6);
       const row = document.getElementById('recsRow');
-      row.innerHTML = recs.map(r => recCardHTML(r)).join('');
+      row.innerHTML = recs.length
+        ? recs.map(recCardHTML).join('')
+        : `<div style="flex:1; color:var(--ink-soft); font-size:14px; padding:var(--s-3) 0;">Aún no hay recomendaciones. ¡Sé el primero! 🎉</div>`;
     }
 
     function recCardHTML(r) {
-      const cat = CATEGORIES[r.categoria];
+      const cat = CATEGORIES[r.categoria] || { emoji: '⭐', color: 'peliculas', singular: r.categoria };
       const author = getUserBy(r.autor);
+      const avg = getRecAvgRating(r.id);
+      const poster = r.imagen_url
+        ? `<img class="rec-poster" src="${r.imagen_url}" alt="">`
+        : `<div class="rec-poster-ph">${cat.emoji}</div>`;
       return `
         <a href="#/rec/${r.id}" class="rec-card">
-          <div class="rec-poster-ph">${cat.emoji}</div>
-          <h3 class="rec-title">${r.titulo}</h3>
-          <span class="badge ${cat.color}">${cat.nombre.replace(/s$/, '')}</span>
-          ${starRating(r.rating)}
+          ${poster}
+          <h3 class="rec-title">${escapeHTML(r.titulo)}</h3>
+          <span class="badge ${cat.color}">${cat.singular}</span>
+          ${avg > 0 ? starRating(avg) : '<div style="font-size:11px; color:var(--ink-soft);">Sin valorar aún</div>'}
           <div class="rec-author">
             ${avatarHTML(r.autor)}
             <span>Por ${author ? author.nombre : r.autor}</span>
@@ -934,20 +1080,69 @@
       `;
     }
 
-    /* ============================================================
-       RENDER: BROMENDATORS
-       ============================================================ */
+    function recListItemHTML(r) {
+      const cat = CATEGORIES[r.categoria] || { emoji: '⭐', color: 'peliculas', singular: r.categoria };
+      const author = getUserBy(r.autor);
+      const avg = getRecAvgRating(r.id);
+      const poster = r.imagen_url
+        ? `<img class="rec-poster" src="${r.imagen_url}" alt="">`
+        : `<div class="rec-poster-ph">${cat.emoji}</div>`;
+      return `
+        <a href="#/rec/${r.id}" class="rec-card">
+          ${poster}
+          <div class="rec-body">
+            <h3 class="rec-title">${escapeHTML(r.titulo)}</h3>
+            <span class="badge ${cat.color}">${cat.singular}</span>
+            ${avg > 0 ? starRating(avg) : '<div style="font-size:11px; color:var(--ink-soft);">Sin valorar aún</div>'}
+            <div class="rec-author">
+              ${avatarHTML(r.autor)}
+              <span>Por ${author ? author.nombre : r.autor} · ${fmtDate(r.timestamp)}</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }
+
+    /* ========== RENDER: CATEGORÍA ========== */
+    function renderCategoria(cat) {
+      const c = CATEGORIES[cat];
+      if (!c) { location.hash = '#/'; return; }
+      document.getElementById('catTitle').textContent = c.nombre;
+      const recs = state.data.recomendaciones
+        .filter(r => r.categoria === cat)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      document.getElementById('catSubtitle').textContent =
+        recs.length === 1 ? '1 recomendación' : `${recs.length} recomendaciones`;
+      const list = document.getElementById('catList');
+      list.innerHTML = recs.length
+        ? recs.map(recListItemHTML).join('')
+        : emptyStateHTML(c.emoji, 'Sin recomendaciones todavía', 'Sé el primero en recomendar algo aquí.');
+    }
+
+    /* ========== RENDER: NOVEDADES ========== */
+    function renderNovedades() {
+      const recs = [...state.data.recomendaciones]
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const list = document.getElementById('novedadesList');
+      list.innerHTML = recs.length
+        ? recs.map(recListItemHTML).join('')
+        : emptyStateHTML('✨', 'Aún no hay novedades', 'Cuando alguien recomiende algo, aparecerá aquí.');
+    }
+
+    /* ========== RENDER: BROMENDATORS ========== */
     function renderBromendators() {
       const list = document.getElementById('bromendatorsList');
+      const usuarios = (state.data.usuarios || []).filter(u => String(u.activo).toUpperCase() !== 'FALSE');
       list.innerHTML = `
         <div style="display:grid; gap: var(--s-3);">
-          ${USERS.map(u => {
-            const recs = MOCK_RECOMENDACIONES.filter(r => r.autor === u.username).length;
+          ${usuarios.map(u => {
+            const recs = state.data.recomendaciones.filter(r => r.autor === u.username).length;
+            const isAdmin = String(u.admin).toUpperCase() === 'TRUE';
             return `
               <a href="#/bromendator/${u.username}" class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4);">
-                <div class="avatar lg" style="background:${u.color}; width:56px; height:56px; font-size:20px;">${getInitials(u.nombre)}</div>
-                <div style="flex:1;">
-                  <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:18px;">${u.nombre}${u.admin ? ' ⭐' : ''}</h3>
+                <div class="avatar lg" style="background:${u.color || '#888'}; width:56px; height:56px; font-size:20px;">${getInitials(u.nombre)}</div>
+                <div style="flex:1; min-width:0;">
+                  <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:18px;">${u.nombre}${isAdmin ? ' ⭐' : ''}</h3>
                   <p style="margin:0; color:var(--ink-soft); font-size:13px;">${recs} recomendacion${recs === 1 ? '' : 'es'}</p>
                 </div>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray-300)"><path d="M9 18l6-6-6-6"/></svg>
@@ -958,60 +1153,403 @@
       `;
     }
 
-    /* ============================================================
-       RENDER: CATEGORÍA
-       ============================================================ */
-    function renderCategoria(cat) {
-      const c = CATEGORIES[cat];
-      if (!c) { location.hash = '#/'; return; }
-      document.getElementById('catTitle').textContent = c.nombre;
-
-      const recs = MOCK_RECOMENDACIONES.filter(r => r.categoria === cat).sort((a, b) => b.ts - a.ts);
-      document.getElementById('catSubtitle').textContent = `${recs.length} recomendacion${recs.length === 1 ? '' : 'es'} de la familia`;
-
-      const list = document.getElementById('catList');
-      list.innerHTML = recs.map(r => {
-        const author = getUserBy(r.autor);
-        return `
-          <a href="#/rec/${r.id}" class="rec-card">
-            <div class="rec-poster-ph">${c.emoji}</div>
-            <div class="rec-body">
-              <h3 class="rec-title">${r.titulo}</h3>
-              <span class="badge ${c.color}">${c.nombre.replace(/s$/, '')}</span>
-              ${starRating(r.rating)}
-              <div class="rec-author">
-                ${avatarHTML(r.autor)}
-                <span>Por ${author ? author.nombre : r.autor}</span>
-              </div>
-            </div>
-          </a>
-        `;
-      }).join('');
+    /* ========== RENDER: BROMENDATOR ========== */
+    function renderBromendator(username) {
+      const u = getUserBy(username);
+      if (!u) { location.hash = '#/bromendators'; return; }
+      document.getElementById('bromendatorName').textContent = u.nombre;
+      const recs = state.data.recomendaciones
+        .filter(r => r.autor === username)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      document.getElementById('bromendatorMeta').textContent = recs.length === 1 ? '1 recomendación' : `${recs.length} recomendaciones`;
+      const content = document.getElementById('bromendatorContent');
+      content.innerHTML = recs.length
+        ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
+        : emptyStateHTML('🤔', `${u.nombre} aún no recomienda nada`, '¡Anímalo a compartir!');
     }
 
-    /* ============================================================
-       INIT
-       ============================================================ */
-    function initApp() {
-      // 1. Detectar usuario por URL o localStorage
-      const { user } = parseRoute(location.hash);
-      if (user && getUserBy(user)) {
-        state.currentUser = user;
-        localStorage.setItem('br_user', user);
-      } else {
-        const stored = localStorage.getItem('br_user');
-        if (stored && getUserBy(stored)) {
-          state.currentUser = stored;
+    /* ========== RENDER: BIBLIOTECA ========== */
+    function renderBiblioteca() {
+      const myConsumido = state.data.consumido.filter(c => c.usuario === state.currentUser);
+      const recIds = new Set(myConsumido.map(c => c.recomendacion_id));
+      const recs = state.data.recomendaciones
+        .filter(r => recIds.has(r.id))
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const list = document.getElementById('bibliotecaList');
+      list.innerHTML = recs.length
+        ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
+        : emptyStateHTML('📖', 'Tu biblioteca está vacía', 'Cuando valores recomendaciones, aparecerán aquí.');
+    }
+
+    /* ========== RENDER: PERFIL ========== */
+    function renderPerfil() {
+      const u = getUserBy(state.currentUser);
+      if (!u) return;
+      const myRecs = state.data.recomendaciones
+        .filter(r => r.autor === state.currentUser)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const myVals = state.data.valoraciones.filter(v => v.usuario === state.currentUser);
+
+      document.getElementById('perfilSubtitle').textContent =
+        `${myRecs.length} recomendacion${myRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
+
+      const content = document.getElementById('perfilContent');
+      content.innerHTML = `
+        <div class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4); margin-bottom: var(--s-4);">
+          <div class="avatar lg" style="background:${u.color || '#888'}; width:64px; height:64px; font-size:24px;">${getInitials(u.nombre)}</div>
+          <div style="flex:1;">
+            <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:20px;">${u.nombre}</h3>
+            <p style="margin:0; color:var(--ink-soft); font-size:13px;">@${u.username}${String(u.admin).toUpperCase() === 'TRUE' ? ' · admin ⭐' : ''}</p>
+          </div>
+        </div>
+
+        <h2 style="font-family:var(--font-display); font-size:22px; margin: var(--s-5) 0 var(--s-3);">Mis recomendaciones</h2>
+        ${myRecs.length
+          ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
+          : emptyStateHTML('✨', 'No has recomendado nada aún', 'Pulsa el botón verde para empezar.')}
+
+        <div style="margin-top: var(--s-5); text-align:center;">
+          <button class="btn-ghost" onclick="logout()">Cambiar de usuario</button>
+        </div>
+      `;
+    }
+    function logout() {
+      if (!confirm('¿Cerrar sesión y elegir otro usuario?')) return;
+      localStorage.removeItem('br_user');
+      state.currentUser = null;
+      location.hash = '#/';
+      showUserPicker();
+    }
+    window.logout = logout;
+
+    /* ========== RENDER: RECOMENDAR ========== */
+    function renderRecomendar() {
+      state.formNew = { categoria: null, subcategoria: null };
+      document.querySelectorAll('#catPicker .cat-pick-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      document.querySelectorAll('#subcatRow .subcat-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      document.getElementById('subcatGroup').style.display = 'none';
+      document.getElementById('recTitulo').value = '';
+      document.getElementById('recComentario').value = '';
+      const submit = document.getElementById('submitRec');
+      submit.disabled = false;
+      submit.textContent = 'Compartir recomendación';
+    }
+
+    function setupForm() {
+      document.querySelectorAll('#catPicker .cat-pick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#catPicker .cat-pick-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+          btn.setAttribute('aria-pressed', 'true');
+          state.formNew.categoria = btn.dataset.cat;
+          document.getElementById('subcatGroup').style.display = btn.dataset.cat === 'musica' ? 'block' : 'none';
+          if (btn.dataset.cat !== 'musica') state.formNew.subcategoria = null;
+        });
+      });
+      document.querySelectorAll('#subcatRow .subcat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#subcatRow .subcat-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+          btn.setAttribute('aria-pressed', 'true');
+          state.formNew.subcategoria = btn.dataset.subcat;
+        });
+      });
+      document.getElementById('submitRec').addEventListener('click', submitRec);
+    }
+
+    async function submitRec() {
+      const btn = document.getElementById('submitRec');
+      const titulo = document.getElementById('recTitulo').value.trim();
+      const comentario = document.getElementById('recComentario').value.trim();
+      if (!state.formNew.categoria) return toast('Elige una categoría', 'error');
+      if (state.formNew.categoria === 'musica' && !state.formNew.subcategoria) return toast('Elige tipo de música', 'error');
+      if (!titulo) return toast('Escribe un título', 'error');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try {
+        const res = await apiGet('createRec', {
+          autor: state.currentUser,
+          categoria: state.formNew.categoria,
+          subcategoria: state.formNew.subcategoria || '',
+          titulo,
+          comentario,
+        });
+        toast('¡Recomendación compartida! 🎉', 'success');
+        await loadData({ silent: true });
+        location.hash = res.id ? `#/rec/${res.id}` : '#/';
+      } catch (err) {
+        toast('Error al guardar: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Compartir recomendación';
+      }
+    }
+
+    /* ========== RENDER: DETALLE ========== */
+    function renderRecDetail(id) {
+      const r = state.data.recomendaciones.find(x => x.id === id);
+      if (!r) {
+        document.getElementById('recDetailContent').innerHTML = emptyStateHTML('❓', 'No encontrada', 'Puede que la hayan borrado.');
+        return;
+      }
+      const cat = CATEGORIES[r.categoria] || { emoji: '⭐', singular: r.categoria, color: 'peliculas' };
+      const author = getUserBy(r.autor);
+      const avg = getRecAvgRating(r.id);
+      const valoraciones = getRecValoraciones(r.id);
+      const reacciones = getRecReacciones(r.id);
+      const myRating = getMyRating(r.id);
+      const myReaction = getMyReaction(r.id);
+      const isMine = r.autor === state.currentUser;
+      const likes = reacciones.filter(x => x.tipo === 'like');
+      const dislikes = reacciones.filter(x => x.tipo === 'dislike');
+
+      document.getElementById('recDetailMeta').textContent = `${cat.singular} · ${fmtDate(r.timestamp)}`;
+
+      const poster = r.imagen_url
+        ? `<img class="detail-poster" src="${r.imagen_url}" alt="">`
+        : `<div class="detail-poster-ph">${cat.emoji}</div>`;
+
+      document.getElementById('recDetailContent').innerHTML = `
+        <div class="detail-hero">
+          ${poster}
+          <div class="detail-info">
+            <h2 class="detail-title">${escapeHTML(r.titulo)}</h2>
+            <span class="badge ${cat.color}">${cat.singular}${r.subcategoria ? ' · ' + r.subcategoria : ''}</span>
+            ${avg > 0
+              ? `<div style="display:flex; align-items:center; gap:var(--s-2);">${starRating(avg, 16)} <span style="font-size:13px; color:var(--ink-soft);">(${valoraciones.length})</span></div>`
+              : `<div style="font-size:12px; color:var(--ink-soft);">Sin valoraciones aún</div>`}
+            <div class="detail-meta">
+              ${avatarHTML(r.autor)} Recomendada por ${author ? author.nombre : r.autor}
+            </div>
+          </div>
+        </div>
+
+        ${r.comentario_autor ? `
+          <div class="detail-section">
+            <h3>El comentario de ${author ? author.nombre : r.autor}</h3>
+            <p>"${escapeHTML(r.comentario_autor)}"</p>
+          </div>
+        ` : ''}
+
+        ${r.sinopsis ? `
+          <div class="detail-section">
+            <h3>Sobre ${cat.singular.toLowerCase()}</h3>
+            <p>${escapeHTML(r.sinopsis)}</p>
+            ${r.creador ? `<p><strong>${cat.color === 'libros' ? 'Autor' : 'Creador'}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
+            ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
+            ${r.plataformas ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
+            ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${escapeHTML(r.rotten_tomatoes)}</p>` : ''}
+            ${r.enlace_principal ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">Ver más →</a></p>` : ''}
+          </div>
+        ` : (r.estado_enriquecimiento === 'pendiente' ? `
+          <div class="detail-section">
+            <p style="text-align:center;">⏳ Enriquecimiento automático: pendiente Fase 3</p>
+          </div>
+        ` : '')}
+
+        <div class="detail-section">
+          <h3>¿Qué te ha parecido?</h3>
+          <div class="reactions">
+            <button class="react-btn like" data-react="like" aria-pressed="${myReaction?.tipo === 'like'}">
+              <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'like' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
+              Me gustó
+            </button>
+            <button class="react-btn dislike" data-react="dislike" aria-pressed="${myReaction?.tipo === 'dislike'}">
+              <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'dislike' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
+              No me gustó
+            </button>
+          </div>
+          ${(likes.length || dislikes.length) ? `
+            <div class="react-counts">
+              ${likes.length ? `<div class="react-count-group">👍 <div class="react-count-avatars">${likes.slice(0, 5).map(x => avatarHTML(x.usuario)).join('')}</div> ${likes.length}</div>` : ''}
+              ${dislikes.length ? `<div class="react-count-group">👎 <div class="react-count-avatars">${dislikes.slice(0, 5).map(x => avatarHTML(x.usuario)).join('')}</div> ${dislikes.length}</div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+
+        ${!isMine ? `
+          <div class="detail-section">
+            <h3>${myRating ? 'Tu valoración' : '¿La consumiste? Valórala'}</h3>
+            <div class="stars-input" id="starsInput" data-current="${myRating?.estrellas || 0}">
+              ${[1,2,3,4,5].map(n => `
+                <button class="star-btn" data-star="${n}" data-on="${myRating && parseFloat(myRating.estrellas) >= n}">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg>
+                </button>
+              `).join('')}
+            </div>
+            <textarea class="form-textarea" id="ratingComment" placeholder="Tu comentario (opcional)">${escapeHTML(myRating?.comentario || '')}</textarea>
+            <div style="display:flex; gap:var(--s-2); margin-top:var(--s-3);">
+              <button class="btn-primary" id="saveRating" style="flex:1;">${myRating ? 'Actualizar' : 'Guardar'} valoración</button>
+              ${myRating ? `<button class="btn-ghost" id="deleteRating">Borrar</button>` : ''}
+            </div>
+          </div>
+        ` : `
+          <div class="detail-section">
+            <p style="font-size:13px; text-align:center;">Esta es tu propia recomendación.</p>
+            <div style="display:flex; gap:var(--s-2); margin-top:var(--s-3); justify-content:center;">
+              <button class="btn-ghost" id="editRec">✏️ Editar</button>
+              <button class="btn-ghost" id="deleteRec" style="color:var(--c-danger);">🗑️ Borrar</button>
+            </div>
+          </div>
+        `}
+
+        ${valoraciones.length ? `
+          <div class="detail-section">
+            <h3>Valoraciones de la familia</h3>
+            ${valoraciones.map(v => {
+              const usr = getUserBy(v.usuario);
+              return `
+                <div style="padding: var(--s-3) 0; border-bottom: 1px solid var(--gray-100);">
+                  <div style="display:flex; align-items:center; gap:var(--s-2); margin-bottom:4px;">
+                    ${avatarHTML(v.usuario)}
+                    <strong style="font-size:14px;">${usr ? usr.nombre : v.usuario}</strong>
+                    ${starRating(parseFloat(v.estrellas), 12)}
+                  </div>
+                  ${v.comentario ? `<p style="margin: 0; font-size:13px; color:var(--ink-soft); padding-left: 32px;">"${escapeHTML(v.comentario)}"</p>` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : ''}
+      `;
+
+      setupRecDetailEvents(r);
+    }
+
+    function setupRecDetailEvents(r) {
+      document.querySelectorAll('.react-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const tipo = btn.dataset.react;
+          const current = getMyReaction(r.id);
+          const newTipo = (current && current.tipo === tipo) ? 'none' : tipo;
+          try {
+            await apiGet('reactRec', { recId: r.id, usuario: state.currentUser, tipo: newTipo });
+            await loadData({ silent: true });
+            renderRecDetail(r.id);
+          } catch (err) {
+            toast('Error: ' + err.message, 'error');
+          }
+        });
+      });
+
+      const starsEl = document.getElementById('starsInput');
+      if (starsEl) {
+        let pendingStars = parseFloat(starsEl.dataset.current) || 0;
+        starsEl.querySelectorAll('.star-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            pendingStars = parseInt(btn.dataset.star);
+            starsEl.querySelectorAll('.star-btn').forEach((b, i) => {
+              b.dataset.on = (i + 1 <= pendingStars) ? 'true' : 'false';
+            });
+          });
+        });
+
+        const saveBtn = document.getElementById('saveRating');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', async () => {
+            if (!pendingStars) return toast('Elige cuántas estrellas', 'error');
+            const comentario = document.getElementById('ratingComment').value.trim();
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Guardando...';
+            try {
+              await apiGet('rateRec', {
+                recId: r.id,
+                usuario: state.currentUser,
+                estrellas: pendingStars,
+                comentario,
+              });
+              toast('Valoración guardada ⭐', 'success');
+              await loadData({ silent: true });
+              renderRecDetail(r.id);
+            } catch (err) {
+              toast('Error: ' + err.message, 'error');
+              saveBtn.disabled = false;
+            }
+          });
+        }
+
+        const delBtn = document.getElementById('deleteRating');
+        if (delBtn) {
+          delBtn.addEventListener('click', async () => {
+            if (!confirm('¿Borrar tu valoración?')) return;
+            try {
+              await apiGet('deleteRating', { recId: r.id, usuario: state.currentUser });
+              toast('Borrada', 'success');
+              await loadData({ silent: true });
+              renderRecDetail(r.id);
+            } catch (err) {
+              toast('Error: ' + err.message, 'error');
+            }
+          });
         }
       }
 
-      if (!state.currentUser) {
-        showUserPicker();
-        return;
+      const editBtn = document.getElementById('editRec');
+      if (editBtn) {
+        editBtn.addEventListener('click', async () => {
+          const newTitle = prompt('Nuevo título:', r.titulo);
+          if (newTitle === null) return;
+          const newComment = prompt('Nuevo comentario:', r.comentario_autor || '');
+          if (newComment === null) return;
+          try {
+            await apiGet('updateRec', { id: r.id, titulo: newTitle, comentario: newComment });
+            toast('Actualizada ✏️', 'success');
+            await loadData({ silent: true });
+            renderRecDetail(r.id);
+          } catch (err) {
+            toast('Error: ' + err.message, 'error');
+          }
+        });
+      }
+      const delRecBtn = document.getElementById('deleteRec');
+      if (delRecBtn) {
+        delRecBtn.addEventListener('click', async () => {
+          if (!confirm('¿Borrar esta recomendación? No se puede deshacer.')) return;
+          try {
+            await apiGet('deleteRec', { id: r.id });
+            toast('Borrada', 'success');
+            await loadData({ silent: true });
+            location.hash = '#/';
+          } catch (err) {
+            toast('Error: ' + err.message, 'error');
+          }
+        });
+      }
+    }
+
+    /* ========== INIT ========== */
+    async function initApp() {
+      const { user } = parseRoute(location.hash);
+      if (user) {
+        localStorage.setItem('br_user', user);
+        state.currentUser = user;
+      } else {
+        const stored = localStorage.getItem('br_user');
+        if (stored) state.currentUser = stored;
       }
 
-      navigate();
+      await loadData();
+
+      if (state.currentUser && !getUserBy(state.currentUser)) {
+        state.currentUser = null;
+        localStorage.removeItem('br_user');
+      }
+
+      setupForm();
+
+      // Quitar splash
+      document.getElementById('splash').classList.add('hide');
+      setTimeout(() => document.getElementById('splash').remove(), 500);
+
+      if (!state.currentUser) {
+        showUserPicker();
+      } else {
+        navigate();
+      }
     }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.currentUser) {
+        loadData({ silent: true }).then(() => navigate());
+      }
+    });
 
     window.addEventListener('hashchange', navigate);
     window.addEventListener('DOMContentLoaded', initApp);
