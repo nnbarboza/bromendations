@@ -155,6 +155,16 @@
       flex: 1; display: flex; align-items: center; justify-content: center;
       font-size: 64px; opacity: 0.85;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+      position: relative;
+    }
+    .cat-art img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+    }
+    .cat-art .emoji-fallback {
+      font-size: 64px;
     }
     .cat-arrow {
       position: absolute; bottom: var(--s-3); right: var(--s-3);
@@ -630,7 +640,7 @@
               <div class="cat-count" id="count-peliculas">— recs</div>
             </div>
           </div>
-          <div class="cat-art">🍿</div>
+          <div class="cat-art"><img src="img/categorias/peliculas.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🍿</span>'"></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -642,7 +652,7 @@
               <div class="cat-count" id="count-series">— recs</div>
             </div>
           </div>
-          <div class="cat-art">📺</div>
+          <div class="cat-art"><img src="img/categorias/series.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📺</span>'"></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -654,7 +664,7 @@
               <div class="cat-count" id="count-musica">— recs</div>
             </div>
           </div>
-          <div class="cat-art">🎧</div>
+          <div class="cat-art"><img src="img/categorias/musica.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🎧</span>'"></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -666,7 +676,7 @@
               <div class="cat-count" id="count-libros">— recs</div>
             </div>
           </div>
-          <div class="cat-art">📚</div>
+          <div class="cat-art"><img src="img/categorias/libros.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📚</span>'"></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
       </div>
@@ -904,11 +914,17 @@
       if (!nombre) return '?';
       return String(nombre).split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
     }
-    function avatarHTML(username, size = '') {
+    function avatarHTML(username, size = '', customPx = null) {
       const u = getUserBy(username);
       if (!u) return `<div class="avatar ${size}">?</div>`;
       const color = u.color || '#888';
-      return `<div class="avatar ${size}" style="background:${color}">${getInitials(u.nombre)}</div>`;
+      const initials = getInitials(u.nombre);
+      const styleSize = customPx ? `width:${customPx}px; height:${customPx}px; font-size:${Math.round(customPx * 0.4)}px;` : '';
+      const avatarFile = u.avatar && String(u.avatar).trim();
+      if (avatarFile) {
+        return `<div class="avatar ${size}" style="background:${color}; overflow:hidden; padding:0; ${styleSize}"><img src="img/avatars/${avatarFile}" alt="${escapeHTML(u.nombre)}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentNode.innerHTML='${initials}'; this.parentNode.style.padding=''; this.parentNode.style.overflow='';"></div>`;
+      }
+      return `<div class="avatar ${size}" style="background:${color}; ${styleSize}">${initials}</div>`;
     }
     function getRecValoraciones(recId) { return state.data.valoraciones.filter(v => v.recomendacion_id === recId); }
     function getRecReacciones(recId)   { return state.data.reacciones.filter(r => r.recomendacion_id === recId); }
@@ -975,7 +991,7 @@
       } else {
         grid.innerHTML = usuarios.map(u => `
           <button class="user-pill" data-username="${u.username}">
-            <div class="avatar lg" style="background:${u.color || '#888'}">${getInitials(u.nombre)}</div>
+            ${avatarHTML(u.username, 'lg')}
             <span>${u.nombre}</span>
           </button>
         `).join('');
@@ -1140,7 +1156,7 @@
             const isAdmin = String(u.admin).toUpperCase() === 'TRUE';
             return `
               <a href="#/bromendator/${u.username}" class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4);">
-                <div class="avatar lg" style="background:${u.color || '#888'}; width:56px; height:56px; font-size:20px;">${getInitials(u.nombre)}</div>
+                ${avatarHTML(u.username, 'lg', 56)}
                 <div style="flex:1; min-width:0;">
                   <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:18px;">${u.nombre}${isAdmin ? ' ⭐' : ''}</h3>
                   <p style="margin:0; color:var(--ink-soft); font-size:13px;">${recs} recomendacion${recs === 1 ? '' : 'es'}</p>
@@ -1196,7 +1212,7 @@
       const content = document.getElementById('perfilContent');
       content.innerHTML = `
         <div class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4); margin-bottom: var(--s-4);">
-          <div class="avatar lg" style="background:${u.color || '#888'}; width:64px; height:64px; font-size:24px;">${getInitials(u.nombre)}</div>
+          ${avatarHTML(u.username, 'lg', 64)}
           <div style="flex:1;">
             <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:20px;">${u.nombre}</h3>
             <p style="margin:0; color:var(--ink-soft); font-size:13px;">@${u.username}${String(u.admin).toUpperCase() === 'TRUE' ? ' · admin ⭐' : ''}</p>
