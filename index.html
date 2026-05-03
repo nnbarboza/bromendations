@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FFF7ED">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BROmendations">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+  <base href="/bromendations/">
+  <title>BROmendations</title>
+
+  <!-- Google Fonts: Playfair Display + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       SISTEMA DE DISEÑO - BROmendations
+       Tipografía: Playfair Display (titulares) + Inter (cuerpo)
+       Sistema 8pt, radio 20px, sombras suaves
+       ============================================================ */
+    :root {
+      /* Paleta principal (categorías + acción) */
+      --c-peliculas: #FF8A80;
+      --c-series:    #6BA4FF;
+      --c-musica:    #B99AE6;
+      --c-libros:    #FFC857;
+      --c-action:    #2E8B6C;
+
+      /* Versiones suaves para fondos de tarjetas */
+      --c-peliculas-soft: #FFD9D4;
+      --c-series-soft:    #D6E4FF;
+      --c-musica-soft:    #E8DEFA;
+      --c-libros-soft:    #FFEAB3;
+
+      /* Neutros */
+      --bg:        #FFF7ED;
+      --surface:   #FFFFFF;
+      --gray-50:   #F2F4F7;
+      --gray-100:  #E6E8EB;
+      --gray-300:  #C1C7CD;
+      --ink:       #2C2F33;
+      --ink-soft:  #5A6068;
+
+      /* Sistema espaciado 8pt */
+      --s-1: 4px;
+      --s-2: 8px;
+      --s-3: 12px;
+      --s-4: 16px;
+      --s-5: 24px;
+      --s-6: 32px;
+      --s-7: 48px;
+
+      /* Otros */
+      --radius: 20px;
+      --radius-sm: 12px;
+      --radius-pill: 999px;
+      --shadow-card: 0 8px 24px rgba(0,0,0,0.06);
+      --shadow-soft: 0 2px 8px rgba(0,0,0,0.04);
+      --max-w: 680px;
+
+      /* Fuentes */
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overscroll-behavior-y: contain;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ============================================================
+       LAYOUT PRINCIPAL
+       ============================================================ */
+    .app {
+      min-height: 100vh;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      padding: var(--s-5) var(--s-4) 0;
+      animation: fadeIn 0.3s ease;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       HEADER PANTALLA INICIO
+       ============================================================ */
+    .home-header {
+      position: relative;
+      padding-right: 96px;
+      margin-bottom: var(--s-5);
+    }
+    .home-header h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 36px;
+      line-height: 1.1;
+      margin: 0 0 var(--s-3);
+      letter-spacing: -0.5px;
+    }
+    .home-header .wave { display: inline-block; transform-origin: 70% 70%; animation: wave 2.5s ease-in-out infinite; }
+    @keyframes wave {
+      0%, 60%, 100% { transform: rotate(0deg); }
+      10%, 30% { transform: rotate(14deg); }
+      20% { transform: rotate(-8deg); }
+      40%, 50% { transform: rotate(14deg); }
+    }
+    .home-header p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 15px;
+      max-width: 22ch;
+    }
+    .home-header .deco {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 96px;
+      height: 96px;
+      background: linear-gradient(135deg, #FFE8C8 0%, #FFC857 100%);
+      border-radius: 50%;
+      opacity: 0.5;
+      filter: blur(12px);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       TARJETAS DE CATEGORÍA (grid 2x2)
+       ============================================================ */
+    .categories {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s-3);
+      margin-bottom: var(--s-6);
+    }
+    .cat-card {
+      position: relative;
+      border-radius: var(--radius);
+      padding: var(--s-4);
+      aspect-ratio: 1 / 1.15;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cat-card:active { transform: scale(0.98); }
+    .cat-card.peliculas { background: var(--c-peliculas-soft); }
+    .cat-card.series    { background: var(--c-series-soft); }
+    .cat-card.musica    { background: var(--c-musica-soft); }
+    .cat-card.libros    { background: var(--c-libros-soft); }
+
+    .cat-card-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-2); }
+    .cat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cat-icon svg { width: 22px; height: 22px; }
+    .cat-card.peliculas .cat-icon svg { color: #C2453B; }
+    .cat-card.series .cat-icon svg    { color: #2A5FB8; }
+    .cat-card.musica .cat-icon svg    { color: #6B4FAE; }
+    .cat-card.libros .cat-icon svg    { color: #B8841A; }
+
+    .cat-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.3px;
+    }
+    .cat-card.peliculas .cat-name { color: #4A1D19; }
+    .cat-card.series .cat-name    { color: #14306B; }
+    .cat-card.musica .cat-name    { color: #322657; }
+    .cat-card.libros .cat-name    { color: #5C3E0A; }
+
+    .cat-count {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.75;
+    }
+    .cat-card.peliculas .cat-count { color: #4A1D19; }
+    .cat-card.series .cat-count    { color: #14306B; }
+    .cat-card.musica .cat-count    { color: #322657; }
+    .cat-card.libros .cat-count    { color: #5C3E0A; }
+
+    /* Placeholder para imagen 3D - sustituirá las que crees después */
+    .cat-art {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      opacity: 0.85;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+    }
+
+    .cat-arrow {
+      position: absolute;
+      bottom: var(--s-3);
+      right: var(--s-3);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-soft);
+    }
+    .cat-arrow svg { width: 16px; height: 16px; }
+    .cat-card.peliculas .cat-arrow svg { color: var(--c-peliculas); }
+    .cat-card.series .cat-arrow svg    { color: var(--c-series); }
+    .cat-card.musica .cat-arrow svg    { color: var(--c-musica); }
+    .cat-card.libros .cat-arrow svg    { color: #D4A21F; }
+
+    /* ============================================================
+       SECCIÓN ÚLTIMAS RECOMENDACIONES
+       ============================================================ */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--s-4);
+    }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+    }
+    .section-head h2 svg { width: 22px; height: 22px; color: var(--c-libros); }
+    .section-head a {
+      color: var(--c-action);
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .recs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s-3);
+      margin-bottom: var(--s-5);
+    }
+
+    .rec-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: var(--s-3);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-2);
+      transition: transform 0.2s ease;
+    }
+    .rec-card:active { transform: scale(0.98); }
+
+    .rec-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius-sm);
+      background: var(--gray-50);
+      object-fit: cover;
+      display: block;
+    }
+    .rec-poster-ph {
+      width: 100%;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      opacity: 0.7;
+    }
+    .rec-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.25;
+      margin: 0;
+      color: var(--ink);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge.peliculas { background: var(--c-peliculas-soft); color: #C2453B; }
+    .badge.series    { background: var(--c-series-soft);    color: #2A5FB8; }
+    .badge.musica    { background: var(--c-musica-soft);    color: #6B4FAE; }
+    .badge.libros    { background: var(--c-libros-soft);    color: #B8841A; }
+
+    .rec-rating {
+      display: flex;
+      gap: 2px;
+    }
+    .rec-rating svg { width: 14px; height: 14px; color: var(--c-libros); }
+    .rec-rating svg.empty { color: var(--gray-100); }
+
+    .rec-author {
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+      padding-top: var(--s-2);
+      border-top: 1px solid var(--gray-100);
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--c-action);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .avatar.lg { width: 40px; height: 40px; font-size: 16px; }
+
+    /* ============================================================
+       BOTTOM NAVIGATION
+       ============================================================ */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--max-w);
+      background: var(--surface);
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+      padding: var(--s-3) var(--s-2) calc(var(--s-3) + env(safe-area-inset-bottom));
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      align-items: end;
+      z-index: 50;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: var(--s-2) 0;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      transition: color 0.2s;
+    }
+    .nav-item svg { width: 24px; height: 24px; }
+    .nav-item.active { color: var(--c-action); }
+    .nav-item.peliculas-color.active { color: var(--c-peliculas); }
+    .nav-item.musica-color.active    { color: var(--c-musica); }
+    .nav-item.libros-color.active    { color: #D4A21F; }
+    .nav-item.bromendators-color.active { color: var(--c-peliculas); }
+    .nav-item.perfil-color.active    { color: var(--c-series); }
+
+    /* Botón central destacado: Recomendar */
+    .nav-cta {
+      grid-column: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transform: translateY(-12px);
+    }
+    .nav-cta-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--c-action);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(46, 139, 108, 0.4);
+      transition: transform 0.2s;
+    }
+    .nav-cta-btn:active { transform: scale(0.92); }
+    .nav-cta-btn svg { width: 28px; height: 28px; }
+    .nav-cta-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--c-action);
+    }
+
+    /* ============================================================
+       PANTALLAS INTERIORES (placeholders Fase 1)
+       ============================================================ */
+    .screen-header {
+      margin-bottom: var(--s-5);
+    }
+    .screen-header h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 32px;
+      margin: 0 0 var(--s-2);
+      letter-spacing: -0.5px;
+    }
+    .screen-header p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .placeholder-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: var(--s-6) var(--s-5);
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      color: var(--ink-soft);
+    }
+    .placeholder-box .ph-emoji { font-size: 48px; margin-bottom: var(--s-3); }
+    .placeholder-box h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 var(--s-2);
+      font-size: 20px;
+    }
+    .placeholder-box p { margin: 0; font-size: 14px; line-height: 1.6; }
+
+    /* ============================================================
+       SELECTOR DE USUARIO (cuando no hay user en URL)
+       ============================================================ */
+    .user-picker {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--s-5);
+    }
+    .user-picker.show { display: flex; }
+    .user-picker-inner {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .user-picker h1 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      margin: 0 0 var(--s-2);
+      letter-spacing: -0.5px;
+    }
+    .user-picker .accent {
+      background: linear-gradient(135deg, var(--c-peliculas), var(--c-musica));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .user-picker p { color: var(--ink-soft); margin: 0 0 var(--s-6); }
+
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--s-3);
+    }
+    .user-pill {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: var(--s-4) var(--s-2);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--s-2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .user-pill:active { transform: scale(0.96); }
+    .user-pill .avatar.lg { width: 56px; height: 56px; font-size: 22px; }
+    .user-pill span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* ============================================================
+       LISTA DE RECOMENDACIONES (vista categoría)
+       ============================================================ */
+    .rec-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-3);
+    }
+    .rec-list .rec-card {
+      flex-direction: row;
+      gap: var(--s-3);
+      padding: var(--s-3);
+    }
+    .rec-list .rec-poster, .rec-list .rec-poster-ph {
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .rec-list .rec-body { flex: 1; display: flex; flex-direction: column; gap: var(--s-2); }
+    .rec-list .rec-author { border-top: none; padding-top: 0; }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (min-width: 720px) {
+      .home-header h1 { font-size: 42px; }
+      .cat-name { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       SELECTOR DE USUARIO (overlay)
+       ============================================================ -->
+  <div class="user-picker" id="userPicker">
+    <div class="user-picker-inner">
+      <h1>Bienvenid@ a <span class="accent">BROmendations</span></h1>
+      <p>¿Quién eres?</p>
+      <div class="user-grid" id="userGrid"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APP
+       ============================================================ -->
+  <div class="app" id="app">
+
+    <!-- ===================== INICIO ===================== -->
+    <section class="screen" id="screen-home">
+      <header class="home-header">
+        <div class="deco" aria-hidden="true"></div>
+        <h1>¡Hola <span id="userName">Nico</span>! <span class="wave">👋</span></h1>
+        <p>Descubre y comparte recomendaciones culturales en familia</p>
+      </header>
+
+      <div class="categories">
+        <a href="#/categoria/peliculas" class="cat-card peliculas">
+          <div class="cat-card-head">
+            <div class="cat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L4 4h4l1.5 3M9.5 7L11 4h4l1.5 3M16.5 7L18 4h4M2 7h20v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg>
+            </div>
+            <div>
+              <div class="cat-name">Películas</div>
+              <div class="cat-count" id="count-peliculas">0 recomendaciones</div>
+            </div>
+          </div>
+          <div class="cat-art">🍿</div>
+          <div class="cat-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="#/categoria/series" class="cat-card series">
+          <div class="cat-card-head">
+            <div class="cat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M7 3l5 4 5-4"/></svg>
+            </div>
+            <div>
+              <div class="cat-name">Series</div>
+              <div class="cat-count" id="count-series">0 recomendaciones</div>
+            </div>
+          </div>
+          <div class="cat-art">📺</div>
+          <div class="cat-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="#/categoria/musica" class="cat-card musica">
+          <div class="cat-card-head">
+            <div class="cat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+            </div>
+            <div>
+              <div class="cat-name">Música</div>
+              <div class="cat-count" id="count-musica">0 recomendaciones</div>
+            </div>
+          </div>
+          <div class="cat-art">🎧</div>
+          <div class="cat-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="#/categoria/libros" class="cat-card libros">
+          <div class="cat-card-head">
+            <div class="cat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+            </div>
+            <div>
+              <div class="cat-name">Libros</div>
+              <div class="cat-count" id="count-libros">0 recomendaciones</div>
+            </div>
+          </div>
+          <div class="cat-art">📚</div>
+          <div class="cat-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+
+      <div class="section-head">
+        <h2><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg> Últimas recomendaciones</h2>
+        <a href="#/novedades">Ver todas <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
+      </div>
+
+      <div class="recs-row" id="recsRow"></div>
+    </section>
+
+    <!-- ===================== MI BIBLIOTECA ===================== -->
+    <section class="screen" id="screen-biblioteca">
+      <header class="screen-header">
+        <h1>Mi biblioteca</h1>
+        <p>Todo lo que has consumido y valorado</p>
+      </header>
+      <div class="placeholder-box">
+        <div class="ph-emoji">📖</div>
+        <h3>Aún sin contenido</h3>
+        <p>Cuando valores recomendaciones aparecerán aquí. Pendiente de Fase 2.</p>
+      </div>
+    </section>
+
+    <!-- ===================== RECOMENDAR ===================== -->
+    <section class="screen" id="screen-recomendar">
+      <header class="screen-header">
+        <h1>Recomendar</h1>
+        <p>Comparte algo que te haya gustado con la familia</p>
+      </header>
+      <div class="placeholder-box">
+        <div class="ph-emoji">✨</div>
+        <h3>Formulario en construcción</h3>
+        <p>Aquí elegirás categoría, subcategoría, título y comentario. La info se enriquecerá con IA. Pendiente de Fase 2.</p>
+      </div>
+    </section>
+
+    <!-- ===================== BROMENDATORS ===================== -->
+    <section class="screen" id="screen-bromendators">
+      <header class="screen-header">
+        <h1>Bromendators</h1>
+        <p>Conoce a la familia recomendadora</p>
+      </header>
+      <div id="bromendatorsList"></div>
+    </section>
+
+    <!-- ===================== MI PERFIL ===================== -->
+    <section class="screen" id="screen-perfil">
+      <header class="screen-header">
+        <h1>Mi perfil</h1>
+        <p>Tu actividad y ajustes</p>
+      </header>
+      <div class="placeholder-box">
+        <div class="ph-emoji">👤</div>
+        <h3>Perfil personal</h3>
+        <p>Aquí verás tus recomendaciones, valoraciones y opciones de admin. Pendiente de Fase 2.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CATEGORÍA (genérica) ===================== -->
+    <section class="screen" id="screen-categoria">
+      <header class="screen-header">
+        <h1 id="catTitle">Categoría</h1>
+        <p id="catSubtitle">Recomendaciones de la familia</p>
+      </header>
+      <div class="rec-list" id="catList"></div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       BOTTOM NAVIGATION
+       ============================================================ -->
+  <nav class="nav" id="bottomNav">
+    <a href="#/" class="nav-item" data-screen="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+      Inicio
+    </a>
+    <a href="#/biblioteca" class="nav-item musica-color" data-screen="biblioteca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h3v16H4zM10 4h3v16h-3zM17 6l3 1-3 14-3-1z"/></svg>
+      Mi biblioteca
+    </a>
+    <div class="nav-cta">
+      <a href="#/recomendar" class="nav-cta-btn" aria-label="Recomendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      </a>
+      <span class="nav-cta-label">Recomendar</span>
+    </div>
+    <a href="#/bromendators" class="nav-item bromendators-color" data-screen="bromendators">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2.5 2-5 5-5"/></svg>
+      Bromendators
+    </a>
+    <a href="#/perfil" class="nav-item perfil-color" data-screen="perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      Mi perfil
+    </a>
+  </nav>
+
+  <script>
+    /* ============================================================
+       CONFIGURACIÓN
+       ============================================================ */
+    const APP_VERSION = '0.1.0';
+
+    // Lista de usuarios. En Fase 2 vendrá del Sheet.
+    const USERS = [
+      { username: 'nico',    nombre: 'Nico',    color: '#FF8A80', admin: true },
+      { username: 'andres',  nombre: 'Andrés',  color: '#6BA4FF', admin: false },
+      { username: 'juampa',  nombre: 'Juampa',  color: '#B99AE6', admin: false },
+      { username: 'seba',    nombre: 'Seba',    color: '#FFC857', admin: false },
+      { username: 'pao',     nombre: 'Pao',     color: '#2E8B6C', admin: false },
+      { username: 'papi',    nombre: 'Papi',    color: '#C2453B', admin: false },
+    ];
+
+    const CATEGORIES = {
+      peliculas: { nombre: 'Películas', emoji: '🍿', color: 'peliculas' },
+      series:    { nombre: 'Series',    emoji: '📺', color: 'series' },
+      musica:    { nombre: 'Música',    emoji: '🎧', color: 'musica' },
+      libros:    { nombre: 'Libros',    emoji: '📚', color: 'libros' },
+    };
+
+    // Datos mock para Fase 1. En Fase 2 vendrán del Sheet.
+    const MOCK_RECOMENDACIONES = [
+      { id: 1, autor: 'pao',    categoria: 'peliculas', titulo: 'Dune: Parte dos',      rating: 4.5, ts: Date.now() - 86400000 },
+      { id: 2, autor: 'papi',   categoria: 'libros',    titulo: 'Cien años de soledad', rating: 5.0, ts: Date.now() - 2 * 86400000 },
+      { id: 3, autor: 'andres', categoria: 'series',    titulo: 'Severance',            rating: 5.0, ts: Date.now() - 3 * 86400000 },
+      { id: 4, autor: 'juampa', categoria: 'musica',    titulo: 'Bad Bunny - DeBÍ TiRAR MáS FOToS', rating: 4.0, ts: Date.now() - 4 * 86400000 },
+      { id: 5, autor: 'seba',   categoria: 'peliculas', titulo: 'Anatomía de una caída', rating: 4.5, ts: Date.now() - 5 * 86400000 },
+      { id: 6, autor: 'nico',   categoria: 'libros',    titulo: 'Tokio blues',          rating: 4.0, ts: Date.now() - 6 * 86400000 },
+    ];
+
+    /* ============================================================
+       ESTADO
+       ============================================================ */
+    const state = {
+      currentUser: null,
+      route: '#/',
+    };
+
+    /* ============================================================
+       UTILIDADES
+       ============================================================ */
+    function getUserBy(username) {
+      return USERS.find(u => u.username === username);
+    }
+    function getInitials(nombre) {
+      return nombre.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
+    }
+    function avatarHTML(username, size = '') {
+      const u = getUserBy(username);
+      if (!u) return '';
+      return `<div class="avatar ${size}" style="background:${u.color}">${getInitials(u.nombre)}</div>`;
+    }
+    function starRating(rating) {
+      let html = '<div class="rec-rating">';
+      for (let i = 1; i <= 5; i++) {
+        const filled = i <= Math.floor(rating);
+        const half = !filled && i - 0.5 <= rating;
+        html += `<svg viewBox="0 0 24 24" fill="${filled || half ? 'currentColor' : 'none'}" stroke="currentColor" class="${filled || half ? '' : 'empty'}" stroke-width="1.5"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg>`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    /* ============================================================
+       USER PICKER
+       ============================================================ */
+    function showUserPicker() {
+      const grid = document.getElementById('userGrid');
+      grid.innerHTML = USERS.map(u => `
+        <button class="user-pill" data-username="${u.username}">
+          <div class="avatar lg" style="background:${u.color}">${getInitials(u.nombre)}</div>
+          <span>${u.nombre}</span>
+        </button>
+      `).join('');
+      grid.querySelectorAll('.user-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const username = btn.dataset.username;
+          localStorage.setItem('br_user', username);
+          location.hash = `#/u/${username}`;
+          document.getElementById('userPicker').classList.remove('show');
+          initApp();
+        });
+      });
+      document.getElementById('userPicker').classList.add('show');
+    }
+
+    /* ============================================================
+       ROUTING
+       ============================================================ */
+    function parseRoute(hash) {
+      // formatos:
+      // #/                            → home
+      // #/u/nico                      → home con user
+      // #/u/nico/biblioteca           → con user
+      // #/biblioteca                  → sin user (usa state.currentUser)
+      // #/categoria/peliculas         → categoría
+      const clean = hash.replace(/^#/, '').replace(/^\//, '');
+      const parts = clean.split('/').filter(Boolean);
+
+      let user = null;
+      let path = parts;
+
+      if (parts[0] === 'u' && parts[1]) {
+        user = parts[1];
+        path = parts.slice(2);
+      }
+      const screen = path[0] || 'home';
+      const param  = path[1] || null;
+      return { user, screen, param };
+    }
+
+    function navigate() {
+      const { user, screen, param } = parseRoute(location.hash);
+
+      // Si la URL trae user, lo guardamos
+      if (user && getUserBy(user)) {
+        state.currentUser = user;
+        localStorage.setItem('br_user', user);
+      }
+
+      if (!state.currentUser) {
+        showUserPicker();
+        return;
+      }
+
+      // Mostrar pantalla
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const screenEl = document.getElementById(`screen-${screen}`);
+      if (screenEl) {
+        screenEl.classList.add('active');
+      } else {
+        document.getElementById('screen-home').classList.add('active');
+      }
+
+      // Render bottom nav activo
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const activeNav = document.querySelector(`.nav-item[data-screen="${screen}"]`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // Render específico de pantalla
+      if (screen === 'home')         renderHome();
+      if (screen === 'bromendators') renderBromendators();
+      if (screen === 'categoria' && param) renderCategoria(param);
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    /* ============================================================
+       RENDER: HOME
+       ============================================================ */
+    function renderHome() {
+      const u = getUserBy(state.currentUser);
+      if (u) document.getElementById('userName').textContent = u.nombre;
+
+      // Contadores por categoría
+      Object.keys(CATEGORIES).forEach(cat => {
+        const count = MOCK_RECOMENDACIONES.filter(r => r.categoria === cat).length;
+        const el = document.getElementById(`count-${cat}`);
+        if (el) el.textContent = `${count} recomendacion${count === 1 ? '' : 'es'}`;
+      });
+
+      // Últimas 2 recomendaciones
+      const recs = [...MOCK_RECOMENDACIONES].sort((a, b) => b.ts - a.ts).slice(0, 2);
+      const row = document.getElementById('recsRow');
+      row.innerHTML = recs.map(r => recCardHTML(r)).join('');
+    }
+
+    function recCardHTML(r) {
+      const cat = CATEGORIES[r.categoria];
+      const author = getUserBy(r.autor);
+      return `
+        <a href="#/rec/${r.id}" class="rec-card">
+          <div class="rec-poster-ph">${cat.emoji}</div>
+          <h3 class="rec-title">${r.titulo}</h3>
+          <span class="badge ${cat.color}">${cat.nombre.replace(/s$/, '')}</span>
+          ${starRating(r.rating)}
+          <div class="rec-author">
+            ${avatarHTML(r.autor)}
+            <span>Por ${author ? author.nombre : r.autor}</span>
+          </div>
+        </a>
+      `;
+    }
+
+    /* ============================================================
+       RENDER: BROMENDATORS
+       ============================================================ */
+    function renderBromendators() {
+      const list = document.getElementById('bromendatorsList');
+      list.innerHTML = `
+        <div style="display:grid; gap: var(--s-3);">
+          ${USERS.map(u => {
+            const recs = MOCK_RECOMENDACIONES.filter(r => r.autor === u.username).length;
+            return `
+              <a href="#/bromendator/${u.username}" class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4);">
+                <div class="avatar lg" style="background:${u.color}; width:56px; height:56px; font-size:20px;">${getInitials(u.nombre)}</div>
+                <div style="flex:1;">
+                  <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:18px;">${u.nombre}${u.admin ? ' ⭐' : ''}</h3>
+                  <p style="margin:0; color:var(--ink-soft); font-size:13px;">${recs} recomendacion${recs === 1 ? '' : 'es'}</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray-300)"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    /* ============================================================
+       RENDER: CATEGORÍA
+       ============================================================ */
+    function renderCategoria(cat) {
+      const c = CATEGORIES[cat];
+      if (!c) { location.hash = '#/'; return; }
+      document.getElementById('catTitle').textContent = c.nombre;
+
+      const recs = MOCK_RECOMENDACIONES.filter(r => r.categoria === cat).sort((a, b) => b.ts - a.ts);
+      document.getElementById('catSubtitle').textContent = `${recs.length} recomendacion${recs.length === 1 ? '' : 'es'} de la familia`;
+
+      const list = document.getElementById('catList');
+      list.innerHTML = recs.map(r => {
+        const author = getUserBy(r.autor);
+        return `
+          <a href="#/rec/${r.id}" class="rec-card">
+            <div class="rec-poster-ph">${c.emoji}</div>
+            <div class="rec-body">
+              <h3 class="rec-title">${r.titulo}</h3>
+              <span class="badge ${c.color}">${c.nombre.replace(/s$/, '')}</span>
+              ${starRating(r.rating)}
+              <div class="rec-author">
+                ${avatarHTML(r.autor)}
+                <span>Por ${author ? author.nombre : r.autor}</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    function initApp() {
+      // 1. Detectar usuario por URL o localStorage
+      const { user } = parseRoute(location.hash);
+      if (user && getUserBy(user)) {
+        state.currentUser = user;
+        localStorage.setItem('br_user', user);
+      } else {
+        const stored = localStorage.getItem('br_user');
+        if (stored && getUserBy(stored)) {
+          state.currentUser = stored;
+        }
+      }
+
+      if (!state.currentUser) {
+        showUserPicker();
+        return;
+      }
+
+      navigate();
+    }
+
+    window.addEventListener('hashchange', navigate);
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+
+</body>
+</html>
