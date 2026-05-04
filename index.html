@@ -966,7 +966,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.4.2';
+    const APP_VERSION = '0.5.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1090,6 +1090,21 @@
         return Math.round(num * 100) + '%';
       }
       return escapeHTML(s);
+    }
+    function linkLabel(url) {
+      if (!url) return 'Ver más';
+      try {
+        const u = new URL(url);
+        if (u.hostname.includes('wikipedia.org')) return 'Ver en Wikipedia';
+        if (u.hostname.includes('imdb.com')) return 'Ver en IMDb';
+        if (u.hostname.includes('themoviedb.org')) return 'Ver en TMDB';
+        if (u.hostname.includes('spotify.com')) return 'Escuchar en Spotify';
+        if (u.hostname.includes('goodreads.com')) return 'Ver en Goodreads';
+        if (u.hostname.includes('openlibrary.org')) return 'Ver en Open Library';
+        if (u.hostname.includes('apple.com')) return 'Ver en Apple';
+        if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) return 'Ver en YouTube';
+        return 'Ver más';
+      } catch { return 'Ver más'; }
     }
     function escapeHTML(s) {
       if (s == null) return '';
@@ -1708,10 +1723,16 @@
             ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
             ${r.plataformas ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
             ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${formatRT(r.rotten_tomatoes)}</p>` : ''}
-            ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">Ver más →</a></p>` : ''}
+            ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">${linkLabel(r.enlace_principal)} →</a></p>` : ''}
             ${(isMine || isAdmin()) ? `<p style="margin-top:var(--s-3); text-align:right;"><button class="btn-ghost" id="reEnrichBtn" style="font-size:12px;">🔄 Regenerar info</button></p>` : ''}
           </div>
           ${trailerSection}
+        ` : (r.estado_enriquecimiento === 'parcial' ? `
+          <div class="detail-section" style="background:#FFF8E1; border:1.5px dashed #FFC857;">
+            <h3 style="color:#8B6500;">🤔 La IA no encontró información</h3>
+            <p>No hemos podido enriquecer automáticamente esta recomendación. Puedes regenerar añadiendo más detalles (autor, año, plataforma...).</p>
+            ${(isMine || isAdmin()) ? `<div style="text-align:center; margin-top:var(--s-3);"><button class="btn-primary" id="reEnrichBtn" style="max-width:280px;">🔄 Regenerar con detalles</button></div>` : ''}
+          </div>
         ` : (String(r.estado_enriquecimiento || '').startsWith('error') ? `
           <div class="detail-section">
             <p style="text-align:center; color:var(--c-danger);">⚠️ Error al enriquecer: ${escapeHTML(String(r.estado_enriquecimiento).replace(/^error: /, ''))}</p>
@@ -1719,9 +1740,9 @@
           </div>
         ` : (r.estado_enriquecimiento === 'enriqueciendo' || r.estado_enriquecimiento === 'pendiente' ? `
           <div class="detail-section">
-            <p style="text-align:center;">⏳ Enriqueciendo con IA... <span id="autoRefreshHint" style="font-size:12px; color:var(--ink-soft); display:block; margin-top:8px;">Refrescando automáticamente...</span></p>
+            <p style="text-align:center;">⏳ Enriqueciendo con IA y buscando en internet... <span id="autoRefreshHint" style="font-size:12px; color:var(--ink-soft); display:block; margin-top:8px;">Puede tardar 5-15 segundos. Refrescando automáticamente...</span></p>
           </div>
-        ` : '')) }
+        ` : ''))) }
 
         <div class="detail-section">
           <h3>¿Qué te ha parecido?</h3>
@@ -1918,16 +1939,14 @@
 
       // Auto-refresh si está enriqueciendo (en background)
       if (r.estado_enriquecimiento === 'enriqueciendo' || r.estado_enriquecimiento === 'pendiente') {
-        // Aborta cualquier polling previo
         if (window._enrichPoll) clearTimeout(window._enrichPoll);
         window._enrichPoll = setTimeout(async () => {
           await loadData({ silent: true });
-          // Solo re-renderiza si seguimos en la misma pantalla
           const { screen, param } = parseRoute(location.hash);
           if (screen === 'rec' && param === r.id) {
             renderRecDetail(r.id);
           }
-        }, 4000); // 4 segundos
+        }, 6000); // 6 segundos (búsqueda web tarda más)
       }
     }
 
