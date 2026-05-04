@@ -966,7 +966,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.4.0';
+    const APP_VERSION = '0.4.1';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1072,6 +1072,25 @@
       const u = getUserBy(state.currentUser);
       return u && String(u.admin).toUpperCase() === 'TRUE';
     }
+    function getCreadorLabel(categoria) {
+      switch (categoria) {
+        case 'peliculas': return 'Director';
+        case 'series':    return 'Creador';
+        case 'musica':    return 'Artista';
+        case 'libros':    return 'Autor';
+        default:          return 'Creador';
+      }
+    }
+    function formatRT(val) {
+      if (!val) return '';
+      const s = String(val).trim();
+      // Si Sheets lo convirtió a decimal (0.97 → "97%")
+      const num = parseFloat(s);
+      if (!isNaN(num) && num > 0 && num < 1 && !s.includes('%')) {
+        return Math.round(num * 100) + '%';
+      }
+      return escapeHTML(s);
+    }
     function escapeHTML(s) {
       if (s == null) return '';
       return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -1088,12 +1107,18 @@
       return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     }
 
-    /* Validación de URLs de imagen: solo dominios que sabemos que sirven imágenes públicas reales */
+    /* Validación de URLs de imagen: dominios que sirven imágenes públicas reales */
     const TRUSTED_IMG_DOMAINS = [
       'upload.wikimedia.org',
       'commons.wikimedia.org',
       'es.wikipedia.org',
       'en.wikipedia.org',
+      'image.tmdb.org',
+      'm.media-amazon.com',     // pósters IMDB
+      'images-na.ssl-images-amazon.com',
+      'covers.openlibrary.org',
+      'i.scdn.co',              // Spotify
+      'i.ytimg.com',            // YouTube thumbnails
     ];
     function isTrustedImgUrl(url) {
       if (!url) return false;
@@ -1103,9 +1128,14 @@
       } catch { return false; }
     }
 
-    /* Validación de enlaces principales: dominios reconocidos */
+    /* Validación de enlaces principales */
     const TRUSTED_LINK_DOMAINS = [
       'wikipedia.org', 'wikimedia.org',
+      'imdb.com', 'themoviedb.org',
+      'goodreads.com', 'openlibrary.org',
+      'spotify.com', 'open.spotify.com',
+      'youtube.com', 'youtu.be',
+      'apple.com', 'apps.apple.com',
     ];
     function isTrustedLinkUrl(url) {
       if (!url) return false;
@@ -1569,7 +1599,7 @@
       btn.disabled = true;
       btn.textContent = 'Enriqueciendo con IA... ✨';
       try {
-        const dirigidoA = (state.formNew.destinatarios || []).join(',');
+        const dirigido_a = (state.formNew.destinatarios || []).join(',');
         const res = await apiGet('createRec', {
           autor: state.currentUser,
           categoria: state.formNew.categoria,
@@ -1577,9 +1607,9 @@
           titulo,
           comentario,
           detalles,
-          dirigidoA,
+          dirigido_a,
         });
-        toast(dirigidoA ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
+        toast(dirigido_a ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
         await loadData({ silent: true });
         location.hash = res.id ? `#/rec/${res.id}` : '#/';
       } catch (err) {
@@ -1673,12 +1703,12 @@
           <div class="detail-section">
             <h3>Sobre ${cat.singular.toLowerCase()}</h3>
             <p>${escapeHTML(r.sinopsis)}</p>
-            ${r.creador ? `<p><strong>${cat.color === 'libros' ? 'Autor' : 'Creador'}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
+            ${r.creador ? `<p><strong>${getCreadorLabel(r.categoria)}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
             ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
             ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
             ${r.plataformas ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
-            ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${escapeHTML(r.rotten_tomatoes)}</p>` : ''}
-            ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">Ver más en Wikipedia →</a></p>` : ''}
+            ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${formatRT(r.rotten_tomatoes)}</p>` : ''}
+            ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">Ver más →</a></p>` : ''}
             ${(isMine || isAdmin()) ? `<p style="margin-top:var(--s-3); text-align:right;"><button class="btn-ghost" id="reEnrichBtn" style="font-size:12px;">🔄 Regenerar info</button></p>` : ''}
           </div>
           ${trailerSection}
