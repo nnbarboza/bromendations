@@ -966,7 +966,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.4.1';
+    const APP_VERSION = '0.4.2';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1347,7 +1347,7 @@
       const avg = getRecAvgRating(r.id);
       const useImg = isTrustedImgUrl(r.imagen_url);
       const poster = useImg
-        ? `<img class="rec-poster" src="${r.imagen_url}" alt="" onerror="this.outerHTML='<div class=\\'rec-poster-ph\\'>${cat.emoji}</div>'">`
+        ? `<div class="rec-poster-wrap"><img class="rec-poster" src="${escapeHTML(r.imagen_url)}" alt="" data-fallback="${cat.emoji}"></div>`
         : `<div class="rec-poster-ph">${cat.emoji}</div>`;
       const forMe = isRecForUser(r, state.currentUser) && r.autor !== state.currentUser;
       return `
@@ -1370,7 +1370,7 @@
       const avg = getRecAvgRating(r.id);
       const useImg = isTrustedImgUrl(r.imagen_url);
       const poster = useImg
-        ? `<img class="rec-poster" src="${r.imagen_url}" alt="" onerror="this.outerHTML='<div class=\\'rec-poster-ph\\'>${cat.emoji}</div>'">`
+        ? `<img class="rec-poster" src="${escapeHTML(r.imagen_url)}" alt="" data-fallback="${cat.emoji}">`
         : `<div class="rec-poster-ph">${cat.emoji}</div>`;
       const forMe = isRecForUser(r, state.currentUser) && r.autor !== state.currentUser;
       return `
@@ -1647,7 +1647,7 @@
 
       const useImg = isTrustedImgUrl(r.imagen_url);
       const poster = useImg
-        ? `<img class="detail-poster" src="${r.imagen_url}" alt="" onerror="this.outerHTML='<div class=\\'detail-poster-ph\\'>${cat.emoji}</div>'">`
+        ? `<img class="detail-poster" src="${escapeHTML(r.imagen_url)}" alt="" data-fallback="${cat.emoji}" data-fallback-class="detail-poster-ph">`
         : `<div class="detail-poster-ph">${cat.emoji}</div>`;
 
       // Trailer (solo películas y series)
@@ -1967,6 +1967,19 @@
         loadData({ silent: true }).then(() => navigate());
       }
     });
+
+    // Fallback global de imágenes: si una <img data-fallback="EMOJI"> falla, reemplazar por placeholder
+    document.addEventListener('error', (e) => {
+      const img = e.target;
+      if (img.tagName === 'IMG' && img.dataset.fallback) {
+        const emoji = img.dataset.fallback;
+        const phClass = img.dataset.fallbackClass || (img.classList.contains('detail-poster') ? 'detail-poster-ph' : 'rec-poster-ph');
+        const div = document.createElement('div');
+        div.className = phClass;
+        div.textContent = emoji;
+        img.replaceWith(div);
+      }
+    }, true); // capture phase: necesario para 'error' que no burbujea
 
     window.addEventListener('hashchange', navigate);
     window.addEventListener('DOMContentLoaded', initApp);
