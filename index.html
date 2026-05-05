@@ -135,6 +135,21 @@
     .cat-card.musica    { background: var(--c-musica-soft); }
     .cat-card.libros    { background: var(--c-libros-soft); }
 
+    .cat-dot {
+      position: absolute;
+      top: 10px; right: 10px;
+      min-width: 22px; height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #C2453B;
+      color: white;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(194, 69, 59, 0.4);
+      z-index: 5;
+      border: 2px solid white;
+    }
+
     .cat-card-head { display: flex; align-items: flex-start; gap: var(--s-2); margin-bottom: var(--s-2); }
     .cat-icon {
       width: 40px; height: 40px; border-radius: 50%;
@@ -652,6 +667,68 @@
       background: rgba(255,255,255,0.85);
     }
 
+    /* Modal genérico */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(44, 47, 51, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: flex; align-items: flex-end; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .modal-card {
+      background: var(--surface);
+      width: 100%;
+      max-width: 520px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      max-height: 88vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+      .modal-card { border-radius: var(--radius); margin: var(--s-4); }
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s-4) var(--s-4) var(--s-3);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .modal-head h2 {
+      font-family: var(--font-display);
+      font-size: 22px; margin: 0;
+    }
+    .modal-close {
+      background: var(--gray-50);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close:active { background: var(--gray-100); }
+    .modal-body {
+      padding: var(--s-4);
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: var(--s-3) var(--s-4) var(--s-4);
+      display: flex; gap: var(--s-2);
+      border-top: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+    .modal-footer .btn-primary,
+    .modal-footer .btn-ghost {
+      flex: 1; min-width: 120px;
+    }
+
     .toast {
       position: fixed; bottom: 100px; left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -741,6 +818,20 @@
   </div>
 
   <div class="loading-bar" id="loadingBar"></div>
+  <!-- Modal genérico (edición, regenerar info, etc) -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal-card" id="modalCard">
+      <div class="modal-head">
+        <h2 id="modalTitle">Modal</h2>
+        <button class="modal-close" id="modalClose" aria-label="Cerrar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <div class="user-picker" id="userPicker">
@@ -765,11 +856,11 @@
 
       <div class="categories">
         <a href="#/categoria/peliculas" class="cat-card peliculas">
+          <span class="cat-dot" id="cat-dot-peliculas" style="display:none;">0</span>
           <div class="cat-card-head">
             <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7L4 4h4l1.5 3M9.5 7L11 4h4l1.5 3M16.5 7L18 4h4M2 7h20v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg></div>
             <div class="cat-card-text">
               <div class="cat-name">Películas</div>
-              <div class="cat-count" id="count-peliculas">— recs</div>
             </div>
           </div>
           <div class="cat-art"><img src="img/categorias/peliculas.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🍿</span>'"></div>
@@ -777,11 +868,11 @@
         </a>
 
         <a href="#/categoria/series" class="cat-card series">
+          <span class="cat-dot" id="cat-dot-series" style="display:none;">0</span>
           <div class="cat-card-head">
             <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M7 3l5 4 5-4"/></svg></div>
             <div class="cat-card-text">
               <div class="cat-name">Series</div>
-              <div class="cat-count" id="count-series">— recs</div>
             </div>
           </div>
           <div class="cat-art"><img src="img/categorias/series.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📺</span>'"></div>
@@ -789,11 +880,11 @@
         </a>
 
         <a href="#/categoria/musica" class="cat-card musica">
+          <span class="cat-dot" id="cat-dot-musica" style="display:none;">0</span>
           <div class="cat-card-head">
             <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
             <div class="cat-card-text">
               <div class="cat-name">Música</div>
-              <div class="cat-count" id="count-musica">— recs</div>
             </div>
           </div>
           <div class="cat-art"><img src="img/categorias/musica.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🎧</span>'"></div>
@@ -801,11 +892,11 @@
         </a>
 
         <a href="#/categoria/libros" class="cat-card libros">
+          <span class="cat-dot" id="cat-dot-libros" style="display:none;">0</span>
           <div class="cat-card-head">
             <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
             <div class="cat-card-text">
               <div class="cat-name">Libros</div>
-              <div class="cat-count" id="count-libros">— recs</div>
             </div>
           </div>
           <div class="cat-art"><img src="img/categorias/libros.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📚</span>'"></div>
@@ -1017,7 +1108,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.7.1';
+    const APP_VERSION = '0.8.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1293,6 +1384,7 @@
           localStorage.setItem(readKey(), JSON.stringify([...ids]));
         } catch {}
         updateBell();
+        updateCategoryBadges();
       }
     }
     function unreadForMe() {
@@ -1309,6 +1401,34 @@
       } else {
         dot.style.display = 'none';
       }
+    }
+    
+    /**
+     * Cuenta no leídas por categoría (cualquier rec que el usuario no haya abierto,
+     * excluyendo las suyas propias).
+     */
+    function unreadCountForCategory(categoria) {
+      if (!state.currentUser) return 0;
+      const read = getReadIds();
+      return state.data.recomendaciones.filter(r =>
+        r.categoria === categoria &&
+        r.autor !== state.currentUser &&
+        !read.has(r.id)
+      ).length;
+    }
+    
+    function updateCategoryBadges() {
+      Object.keys(CATEGORIES).forEach(cat => {
+        const dot = document.getElementById(`cat-dot-${cat}`);
+        if (!dot) return;
+        const n = unreadCountForCategory(cat);
+        if (n > 0) {
+          dot.style.display = 'flex';
+          dot.textContent = n > 9 ? '9+' : n;
+        } else {
+          dot.style.display = 'none';
+        }
+      });
     }
     function starRating(rating, size = 14) {
       let html = '<div class="rec-rating">';
@@ -1330,6 +1450,35 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { el.className = 'toast ' + type; }, 2800);
     }
+
+    /* ========== MODAL API ========== */
+    let _modalOnSubmit = null;
+    function showModal({ title, bodyHtml, primaryLabel, onSubmit, secondaryLabel, onSecondary }) {
+      const overlay = document.getElementById('modalOverlay');
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = bodyHtml;
+      const footer = document.getElementById('modalFooter');
+      footer.innerHTML = `
+        ${secondaryLabel ? `<button class="btn-ghost" id="modalSecondary">${escapeHTML(secondaryLabel)}</button>` : ''}
+        ${primaryLabel ? `<button class="btn-primary" id="modalPrimary">${escapeHTML(primaryLabel)}</button>` : ''}
+      `;
+      _modalOnSubmit = onSubmit || null;
+      const primary = document.getElementById('modalPrimary');
+      if (primary) primary.addEventListener('click', () => { if (_modalOnSubmit) _modalOnSubmit(); });
+      const sec = document.getElementById('modalSecondary');
+      if (sec) sec.addEventListener('click', onSecondary || closeModal);
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+      _modalOnSubmit = null;
+    }
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target.id === 'modalOverlay') closeModal();
+    });
     function showLoading() {
       document.getElementById('loadingBar').className = 'loading-bar show';
     }
@@ -1415,6 +1564,7 @@
         case 'bromendator':  renderBromendator(param); break;
       }
       updateBell();
+      updateCategoryBadges();
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
@@ -1422,11 +1572,6 @@
     function renderHome() {
       const u = getUserBy(state.currentUser);
       if (u) document.getElementById('userName').textContent = u.nombre;
-      Object.keys(CATEGORIES).forEach(cat => {
-        const count = state.data.recomendaciones.filter(r => r.categoria === cat).length;
-        const el = document.getElementById(`count-${cat}`);
-        if (el) el.textContent = count === 1 ? '1 recomendación' : `${count} recomendaciones`;
-      });
       const recs = [...state.data.recomendaciones]
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
         .slice(0, 6);
@@ -1435,6 +1580,7 @@
         ? recs.map(recCardHTML).join('')
         : `<div style="flex:1; color:var(--ink-soft); font-size:14px; padding:var(--s-3) 0;">Aún no hay recomendaciones. ¡Sé el primero! 🎉</div>`;
       updateBell();
+      updateCategoryBadges();
     }
 
     function recCardHTML(r) {
@@ -1607,8 +1753,9 @@
         </div>
 
         ${isUserAdmin ? `
-          <div style="margin-bottom: var(--s-4); text-align:center;">
+          <div style="margin-bottom: var(--s-4); display:flex; gap: var(--s-2); flex-wrap: wrap; justify-content:center;">
             <button class="btn-ghost" onclick="logout()" style="font-size:13px;">🔄 Cambiar de usuario</button>
+            <button class="btn-ghost" onclick="downloadBackup()" style="font-size:13px;">💾 Backup JSON</button>
           </div>
         ` : ''}
 
@@ -1626,6 +1773,49 @@
       showUserPicker();
     }
     window.logout = logout;
+
+    /**
+     * Descargar todos los datos del Sheet como JSON (solo admin)
+     */
+    function downloadBackup() {
+      try {
+        const payload = {
+          exported_at: new Date().toISOString(),
+          exported_by: state.currentUser,
+          version: APP_VERSION,
+          data: {
+            usuarios:        state.data.usuarios,
+            recomendaciones: state.data.recomendaciones,
+            valoraciones:    state.data.valoraciones,
+            reacciones:      state.data.reacciones,
+            consumido:       state.data.consumido,
+          },
+          stats: {
+            total_recomendaciones: state.data.recomendaciones.length,
+            total_valoraciones:    state.data.valoraciones.length,
+            total_reacciones:      state.data.reacciones.length,
+            total_consumido:       state.data.consumido.length,
+          },
+        };
+        const json = JSON.stringify(payload, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const stamp = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `bromendations_backup_${stamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 200);
+        toast(`Backup descargado (${payload.stats.total_recomendaciones} recs)`, 'success');
+      } catch (e) {
+        toast('Error al exportar: ' + e.message, 'error');
+      }
+    }
+    window.downloadBackup = downloadBackup;
 
     /* ========== RENDER: RECOMENDAR ========== */
     function renderRecomendar() {
@@ -1807,7 +1997,7 @@
           break;
         
         case 'concierto':
-          tituloLabel.textContent = 'Nombre del concierto o gira';
+          tituloLabel.innerHTML = 'Nombre del concierto o gira <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>';
           tituloInput.placeholder = 'Ej: World\'s Hottest Tour';
           creadorGroup.style.display = 'block';
           creadorLabel.textContent = 'Artista';
@@ -1847,7 +2037,9 @@
       
       if (!cat) return toast('Elige una categoría', 'error');
       if (cat === 'musica' && !sub) return toast('Elige tipo de música', 'error');
-      if (!titulo) return toast('Escribe un título', 'error');
+      // Título obligatorio salvo concierto
+      const isConcierto = (cat === 'musica' && sub === 'concierto');
+      if (!titulo && !isConcierto) return toast('Escribe un título', 'error');
       
       // Para "artista" (música), el creador es el mismo título
       if (cat === 'musica' && sub === 'artista') {
@@ -1875,6 +2067,12 @@
         return toast('Pega un enlace de YouTube del concierto', 'error');
       }
       
+      // Para concierto, si no hay título, derivar uno
+      let tituloFinal = titulo;
+      if (isConcierto && !tituloFinal) {
+        tituloFinal = creador ? `${creador} en directo` : 'Concierto';
+      }
+      
       btn.disabled = true;
       btn.textContent = 'Enriqueciendo con IA... ✨';
       try {
@@ -1883,7 +2081,7 @@
           autor: state.currentUser,
           categoria: cat,
           subcategoria: sub || '',
-          titulo,
+          titulo: tituloFinal,
           comentario,
           detalles,
           creador,
@@ -2158,19 +2356,39 @@
 
       const editBtn = document.getElementById('editRec');
       if (editBtn) {
-        editBtn.addEventListener('click', async () => {
-          const newTitle = prompt('Nuevo título:', r.titulo);
-          if (newTitle === null) return;
-          const newComment = prompt('Nuevo comentario:', r.comentario_autor || '');
-          if (newComment === null) return;
-          try {
-            await apiGet('updateRec', { id: r.id, titulo: newTitle, comentario: newComment });
-            toast('Actualizada ✏️', 'success');
-            await loadData({ silent: true });
-            renderRecDetail(r.id);
-          } catch (err) {
-            toast('Error: ' + err.message, 'error');
-          }
+        editBtn.addEventListener('click', () => {
+          showModal({
+            title: 'Editar recomendación',
+            bodyHtml: `
+              <div class="form-group">
+                <label class="form-label" for="editTitulo">Título</label>
+                <input type="text" id="editTitulo" class="form-input" value="${escapeHTML(r.titulo)}">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editComentario">Tu comentario</label>
+                <textarea id="editComentario" class="form-textarea" rows="3">${escapeHTML(r.comentario_autor || '')}</textarea>
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin: var(--s-2) 0 0;">
+                Si quieres cambiar la información autogenerada (sinopsis, póster, etc.), usa "Regenerar info" en su lugar.
+              </p>
+            `,
+            secondaryLabel: 'Cancelar',
+            primaryLabel: 'Guardar cambios',
+            onSubmit: async () => {
+              const newTitle = document.getElementById('editTitulo').value.trim();
+              const newComment = document.getElementById('editComentario').value.trim();
+              if (!newTitle) { toast('El título no puede estar vacío', 'error'); return; }
+              try {
+                await apiGet('updateRec', { id: r.id, titulo: newTitle, comentario: newComment });
+                closeModal();
+                toast('Actualizada ✏️', 'success');
+                await loadData({ silent: true });
+                renderRecDetail(r.id);
+              } catch (err) {
+                toast('Error: ' + err.message, 'error');
+              }
+            },
+          });
         });
       }
       const delRecBtn = document.getElementById('deleteRec');
@@ -2191,24 +2409,40 @@
       // Botón de re-enriquecer (solo autor o admin)
       const reEnrichBtn = document.getElementById('reEnrichBtn');
       if (reEnrichBtn) {
-        reEnrichBtn.addEventListener('click', async () => {
-          const detalles = prompt(
-            '¿Quieres dar pistas a la IA para identificar mejor la obra? (opcional)\n\nEj: "2025, dirigida por Alauda Ruiz de Azúa"\n\nDeja vacío y pulsa OK para regenerar sin pistas.',
-            ''
-          );
-          if (detalles === null) return; // canceló
-          reEnrichBtn.disabled = true;
-          reEnrichBtn.textContent = 'Enriqueciendo... ✨';
-          try {
-            await apiGet('reEnrich', { recId: r.id, detalles: detalles || '' });
-            toast('Información regenerada ✨', 'success');
-            await loadData({ silent: true });
-            renderRecDetail(r.id);
-          } catch (err) {
-            toast('Error: ' + err.message, 'error');
-            reEnrichBtn.disabled = false;
-            reEnrichBtn.textContent = '🔄 Regenerar info';
-          }
+        reEnrichBtn.addEventListener('click', () => {
+          showModal({
+            title: 'Regenerar información',
+            bodyHtml: `
+              <p style="margin: 0 0 var(--s-3); color: var(--ink-soft); font-size: 14px;">
+                ¿Quieres dar pistas a la IA para identificar mejor la obra?
+              </p>
+              <div class="form-group">
+                <label class="form-label" for="reDetalles">Detalles (opcional)</label>
+                <input type="text" id="reDetalles" class="form-input" placeholder="Ej: 2025, dirigida por Alauda Ruiz de Azúa">
+                <span style="display:block; font-size:11px; color:var(--ink-soft); margin-top:4px;">
+                  Año, autor/a, plataforma o cualquier dato que ayude a desambiguar.
+                </span>
+              </div>
+            `,
+            secondaryLabel: 'Cancelar',
+            primaryLabel: '🔄 Regenerar',
+            onSubmit: async () => {
+              const detalles = document.getElementById('reDetalles').value.trim();
+              closeModal();
+              reEnrichBtn.disabled = true;
+              reEnrichBtn.textContent = 'Enriqueciendo... ✨';
+              try {
+                await apiGet('reEnrich', { recId: r.id, detalles: detalles || '' });
+                toast('Información regenerada ✨', 'success');
+                await loadData({ silent: true });
+                renderRecDetail(r.id);
+              } catch (err) {
+                toast('Error: ' + err.message, 'error');
+                reEnrichBtn.disabled = false;
+                reEnrichBtn.textContent = '🔄 Regenerar info';
+              }
+            },
+          });
         });
       }
 
