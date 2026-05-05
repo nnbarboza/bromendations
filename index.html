@@ -858,8 +858,8 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="recTitulo">Título</label>
+        <div class="form-group" id="tituloGroup">
+          <label class="form-label" for="recTitulo" id="tituloLabel">Título</label>
           <input type="text" id="recTitulo" class="form-input" placeholder="Ej: Cien años de soledad">
         </div>
 
@@ -868,10 +868,17 @@
           <input type="text" id="recCreador" class="form-input" placeholder="Ej: Gabriel García Márquez">
         </div>
 
+        <div class="form-group" id="lugarGroup" style="display:none;">
+          <label class="form-label" for="recLugar">
+            Lugar <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
+          </label>
+          <input type="text" id="recLugar" class="form-input" placeholder="Ej: Madrid, WiZink Center">
+        </div>
+
         <div class="form-group" id="spotifyGroup" style="display:none;">
           <label class="form-label" for="recSpotify">
-            Enlace de Spotify <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
-            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;">
+            Enlace de Spotify <span style="color:var(--ink-soft); font-weight:400;" id="spotifyOptional">(opcional)</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;" id="spotifyHint">
               Pégalo si lo tienes a mano. Si no, lo buscamos por ti.
             </span>
           </label>
@@ -1010,7 +1017,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.7.0';
+    const APP_VERSION = '0.7.1';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1135,6 +1142,11 @@
       }
       return escapeHTML(s);
     }
+    function puntuacionLabel(val) {
+      // Si el valor termina en "(TMDb)", "(Spotify)" etc, usar "Puntuación"
+      if (/\(([^)]+)\)\s*$/.test(String(val))) return 'Puntuación';
+      return 'Rotten Tomatoes';
+    }
     function linkLabel(url) {
       if (!url) return 'Ver más';
       try {
@@ -1149,6 +1161,31 @@
         if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) return 'Ver en YouTube';
         return 'Ver más';
       } catch { return 'Ver más'; }
+    }
+
+    /**
+     * Si la URL es de Spotify (track/album/artist), construye un embed iframe.
+     * Devuelve HTML o cadena vacía.
+     */
+    function buildSpotifyEmbed(url) {
+      if (!url) return '';
+      const m = String(url).match(/spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist)\/([a-zA-Z0-9]+)/);
+      if (!m) return '';
+      const tipo = m[1];
+      const id = m[2];
+      // El embed de track tiene altura 152, álbum y artista 352
+      const height = tipo === 'track' ? 152 : 352;
+      const titulo = tipo === 'artist' ? '🎤 Spotify' : (tipo === 'album' ? '💿 Spotify' : '🎵 Spotify');
+      return `
+        <div class="detail-section">
+          <h3>${titulo}</h3>
+          <iframe src="https://open.spotify.com/embed/${tipo}/${id}?utm_source=generator&theme=0"
+                  width="100%" height="${height}" frameborder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  style="border-radius:12px; display:block;"></iframe>
+        </div>
+      `;
     }
     function escapeHTML(s) {
       if (s == null) return '';
@@ -1610,6 +1647,10 @@
       if (recVideo) recVideo.value = '';
       const videoGroup = document.getElementById('videoGroup');
       if (videoGroup) videoGroup.style.display = 'none';
+      const recLugar = document.getElementById('recLugar');
+      if (recLugar) recLugar.value = '';
+      const lugarGroup = document.getElementById('lugarGroup');
+      if (lugarGroup) lugarGroup.style.display = 'none';
       const det = document.getElementById('recDetalles');
       if (det) det.value = '';
 
@@ -1676,9 +1717,8 @@
         label.textContent = 'Autor/a';
         input.placeholder = 'Ej: Gabriel García Márquez';
       } else if (categoria === 'musica') {
-        group.style.display = 'block';
-        label.textContent = 'Artista';
-        input.placeholder = 'Ej: Radiohead';
+        // En música el manejo se delega a updateExtraFields
+        // (puede esconderse si subcategoria === 'artista' porque ahí ES el título)
       } else {
         group.style.display = 'none';
         input.value = '';
@@ -1686,29 +1726,105 @@
     }
 
     function updateExtraFields(categoria, subcategoria) {
-      const spotifyGroup = document.getElementById('spotifyGroup');
-      const videoGroup = document.getElementById('videoGroup');
-      const recSpotify = document.getElementById('recSpotify');
-      const recVideo = document.getElementById('recVideo');
-      if (!spotifyGroup || !videoGroup) return;
+      const tituloGroup   = document.getElementById('tituloGroup');
+      const tituloLabel   = document.getElementById('tituloLabel');
+      const tituloInput   = document.getElementById('recTitulo');
+      const creadorGroup  = document.getElementById('creadorGroup');
+      const creadorLabel  = document.getElementById('creadorLabel');
+      const creadorInput  = document.getElementById('recCreador');
+      const spotifyGroup  = document.getElementById('spotifyGroup');
+      const spotifyHint   = document.getElementById('spotifyHint');
+      const videoGroup    = document.getElementById('videoGroup');
+      const videoOptional = document.getElementById('videoOptional');
+      const videoHint     = document.getElementById('videoHint');
+      const lugarGroup    = document.getElementById('lugarGroup');
+      const recVideo      = document.getElementById('recVideo');
+      const recSpotify    = document.getElementById('recSpotify');
+      const recLugar      = document.getElementById('recLugar');
       
-      // Spotify: solo para música canción / álbum / artista
-      const isSpotifyKind = categoria === 'musica' && ['cancion', 'album', 'artista'].includes(subcategoria);
-      // Video YouTube: solo para concierto (música)
-      const isConcierto = categoria === 'musica' && subcategoria === 'concierto';
+      // Defaults: ocultar todos los campos extra y mostrar título
+      tituloGroup.style.display = 'block';
+      tituloLabel.textContent = 'Título';
+      tituloInput.placeholder = 'Ej: Cien años de soledad';
+      lugarGroup.style.display = 'none';
+      spotifyGroup.style.display = 'none';
+      videoGroup.style.display = 'none';
       
-      if (isSpotifyKind) {
-        spotifyGroup.style.display = 'block';
-      } else {
-        spotifyGroup.style.display = 'none';
+      // CATEGORÍAS NO MÚSICA
+      if (categoria !== 'musica') {
+        // Libros: mostrar Autor
+        if (categoria === 'libros') {
+          creadorGroup.style.display = 'block';
+          creadorLabel.textContent = 'Autor/a';
+          creadorInput.placeholder = 'Ej: Gabriel García Márquez';
+        } else {
+          creadorGroup.style.display = 'none';
+          creadorInput.value = '';
+        }
+        // Limpiar campos no usados
         if (recSpotify) recSpotify.value = '';
+        if (recVideo) recVideo.value = '';
+        if (recLugar) recLugar.value = '';
+        return;
       }
       
-      if (isConcierto) {
-        videoGroup.style.display = 'block';
-      } else {
-        videoGroup.style.display = 'none';
-        if (recVideo) recVideo.value = '';
+      // MÚSICA
+      switch (subcategoria) {
+        case 'cancion':
+          tituloLabel.textContent = 'Título de la canción';
+          tituloInput.placeholder = 'Ej: Vampire';
+          creadorGroup.style.display = 'block';
+          creadorLabel.textContent = 'Artista';
+          creadorInput.placeholder = 'Ej: Olivia Rodrigo';
+          spotifyGroup.style.display = 'block';
+          videoGroup.style.display = 'block';
+          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoHint) videoHint.textContent = 'Si pegas un videoclip oficial, se mostrará junto a la canción.';
+          break;
+        
+        case 'album':
+          tituloLabel.textContent = 'Título del álbum';
+          tituloInput.placeholder = 'Ej: In Rainbows';
+          creadorGroup.style.display = 'block';
+          creadorLabel.textContent = 'Artista';
+          creadorInput.placeholder = 'Ej: Radiohead';
+          spotifyGroup.style.display = 'block';
+          videoGroup.style.display = 'block';
+          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoHint) videoHint.textContent = 'Si pegas un video del álbum, se mostrará en la recomendación.';
+          break;
+        
+        case 'artista':
+          // Para artista, el "título" ES el nombre del artista. Escondemos campo separado.
+          tituloLabel.textContent = 'Nombre del artista';
+          tituloInput.placeholder = 'Ej: Bad Bunny';
+          creadorGroup.style.display = 'none';
+          creadorInput.value = '';
+          spotifyGroup.style.display = 'block';
+          videoGroup.style.display = 'block';
+          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoHint) videoHint.textContent = 'Si pegas un videoclip representativo, se mostrará en la recomendación.';
+          break;
+        
+        case 'concierto':
+          tituloLabel.textContent = 'Nombre del concierto o gira';
+          tituloInput.placeholder = 'Ej: World\'s Hottest Tour';
+          creadorGroup.style.display = 'block';
+          creadorLabel.textContent = 'Artista';
+          creadorInput.placeholder = 'Ej: Bad Bunny';
+          lugarGroup.style.display = 'block';
+          spotifyGroup.style.display = 'none';
+          if (recSpotify) recSpotify.value = '';
+          videoGroup.style.display = 'block';
+          // Para concierto, el video es OBLIGATORIO
+          if (videoOptional) videoOptional.textContent = '(obligatorio)';
+          if (videoHint) videoHint.textContent = 'Pega un video del concierto para que se muestre en la recomendación.';
+          break;
+        
+        default:
+          // Sin subcategoría todavía
+          creadorGroup.style.display = 'none';
+          break;
       }
     }
 
@@ -1718,25 +1834,45 @@
       const comentario = document.getElementById('recComentario').value.trim();
       const detalles = (document.getElementById('recDetalles').value || '').trim();
       const creadorInput = document.getElementById('recCreador');
-      const creador = creadorInput ? creadorInput.value.trim() : '';
+      let creador = creadorInput ? creadorInput.value.trim() : '';
       const spotifyInput = document.getElementById('recSpotify');
       const enlace_spotify = spotifyInput ? spotifyInput.value.trim() : '';
       const videoInput = document.getElementById('recVideo');
       const video_url = videoInput ? videoInput.value.trim() : '';
+      const lugarInput = document.getElementById('recLugar');
+      const lugar = lugarInput ? lugarInput.value.trim() : '';
       
-      if (!state.formNew.categoria) return toast('Elige una categoría', 'error');
-      if (state.formNew.categoria === 'musica' && !state.formNew.subcategoria) return toast('Elige tipo de música', 'error');
+      const cat = state.formNew.categoria;
+      const sub = state.formNew.subcategoria;
+      
+      if (!cat) return toast('Elige una categoría', 'error');
+      if (cat === 'musica' && !sub) return toast('Elige tipo de música', 'error');
       if (!titulo) return toast('Escribe un título', 'error');
-      if ((state.formNew.categoria === 'libros' || state.formNew.categoria === 'musica') && !creador) {
-        const tipo = state.formNew.categoria === 'libros' ? 'autor/a' : 'artista';
-        return toast(`Escribe el ${tipo} para encontrar la obra`, 'error');
+      
+      // Para "artista" (música), el creador es el mismo título
+      if (cat === 'musica' && sub === 'artista') {
+        creador = titulo;
       }
-      // Validar URLs si vienen
-      if (enlace_spotify && !/spotify\.com\/(track|album|artist)/.test(enlace_spotify)) {
+      
+      // Validación de creador obligatorio
+      if (cat === 'libros' && !creador) {
+        return toast('Escribe el autor/a para encontrar el libro', 'error');
+      }
+      if (cat === 'musica' && (sub === 'cancion' || sub === 'album' || sub === 'concierto') && !creador) {
+        return toast('Escribe el artista para encontrar la obra', 'error');
+      }
+      
+      // Validación de URLs
+      if (enlace_spotify && !/spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist)\//.test(enlace_spotify)) {
         return toast('El enlace de Spotify no parece válido', 'error');
       }
       if (video_url && !/(youtube\.com\/watch|youtu\.be\/)/.test(video_url)) {
         return toast('El enlace de YouTube no parece válido', 'error');
+      }
+      
+      // Para concierto, video YouTube es obligatorio
+      if (cat === 'musica' && sub === 'concierto' && !video_url) {
+        return toast('Pega un enlace de YouTube del concierto', 'error');
       }
       
       btn.disabled = true;
@@ -1745,14 +1881,15 @@
         const dirigido_a = (state.formNew.destinatarios || []).join(',');
         const res = await apiGet('createRec', {
           autor: state.currentUser,
-          categoria: state.formNew.categoria,
-          subcategoria: state.formNew.subcategoria || '',
+          categoria: cat,
+          subcategoria: sub || '',
           titulo,
           comentario,
           detalles,
           creador,
           enlace_spotify,
           video_url,
+          lugar,
           dirigido_a,
         });
         toast(dirigido_a ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
@@ -1796,14 +1933,15 @@
         ? `<img class="detail-poster" src="${escapeHTML(r.imagen_url)}" alt="" data-fallback="${cat.emoji}" data-fallback-class="detail-poster-ph">`
         : `<div class="detail-poster-ph">${cat.emoji}</div>`;
 
-      // Trailer (solo películas y series)
-      const ytId = (r.categoria === 'peliculas' || r.categoria === 'series') ? extractYouTubeId(r.trailer_url) : null;
+      // Trailer YouTube: para películas, series, música (todas las subcategorías)
+      const aplicaTrailer = ['peliculas', 'series', 'musica'].includes(r.categoria);
+      const ytId = aplicaTrailer ? extractYouTubeId(r.trailer_url) : null;
       const trailerSection = ytId ? `
         <div class="detail-section">
-          <h3>🎬 Trailer</h3>
+          <h3>${r.categoria === 'musica' ? '🎬 Video' : '🎬 Trailer'}</h3>
           <div class="trailer-wrap">
             <iframe src="https://www.youtube-nocookie.com/embed/${ytId}" 
-                    title="Trailer" 
+                    title="Video" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen
@@ -1811,6 +1949,11 @@
           </div>
         </div>
       ` : '';
+      
+      // Embed Spotify (solo música no-concierto con enlace de Spotify)
+      const spotifyEmbed = (r.categoria === 'musica' && r.subcategoria !== 'concierto')
+        ? buildSpotifyEmbed(r.enlace_principal)
+        : '';
 
       // Enlace principal solo si es de dominio confiable
       const showLink = isTrustedLinkUrl(r.enlace_principal);
@@ -1852,12 +1995,13 @@
             ${r.creador ? `<p><strong>${getCreadorLabel(r.categoria)}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
             ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
             ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
-            ${r.plataformas && r.categoria !== 'libros' ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
-            ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${formatRT(r.rotten_tomatoes)}</p>` : ''}
+            ${r.plataformas && r.categoria !== 'libros' && r.categoria !== 'musica' ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
+            ${r.rotten_tomatoes ? `<p><strong>${puntuacionLabel(r.rotten_tomatoes)}:</strong> ${formatRT(r.rotten_tomatoes)}</p>` : ''}
             ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">${linkLabel(r.enlace_principal)} →</a></p>` : ''}
             ${(isMine || isAdmin()) ? `<p style="margin-top:var(--s-3); text-align:right;"><button class="btn-ghost" id="reEnrichBtn" style="font-size:12px;">🔄 Regenerar info</button></p>` : ''}
           </div>
           ${trailerSection}
+          ${spotifyEmbed}
         ` : (r.estado_enriquecimiento === 'parcial' ? `
           <div class="detail-section" style="background:#FFF8E1; border:1.5px dashed #FFC857;">
             <h3 style="color:#8B6500;">🤔 La IA no encontró información</h3>
