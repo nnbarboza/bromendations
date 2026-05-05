@@ -868,6 +868,26 @@
           <input type="text" id="recCreador" class="form-input" placeholder="Ej: Gabriel García Márquez">
         </div>
 
+        <div class="form-group" id="spotifyGroup" style="display:none;">
+          <label class="form-label" for="recSpotify">
+            Enlace de Spotify <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;">
+              Pégalo si lo tienes a mano. Si no, lo buscamos por ti.
+            </span>
+          </label>
+          <input type="url" id="recSpotify" class="form-input" placeholder="https://open.spotify.com/...">
+        </div>
+
+        <div class="form-group" id="videoGroup" style="display:none;">
+          <label class="form-label" for="recVideo">
+            Enlace de YouTube <span style="color:var(--ink-soft); font-weight:400;" id="videoOptional">(opcional)</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;" id="videoHint">
+              Si pegas un videoclip oficial, se mostrará en la recomendación.
+            </span>
+          </label>
+          <input type="url" id="recVideo" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="recComentario">Tu comentario <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span></label>
           <textarea id="recComentario" class="form-textarea" placeholder="¿Qué te ha gustado? ¿A quién se la recomendarías?"></textarea>
@@ -990,7 +1010,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.6.0';
+    const APP_VERSION = '0.7.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1582,6 +1602,14 @@
       if (recCreador) recCreador.value = '';
       const creadorGroup = document.getElementById('creadorGroup');
       if (creadorGroup) creadorGroup.style.display = 'none';
+      const recSpotify = document.getElementById('recSpotify');
+      if (recSpotify) recSpotify.value = '';
+      const spotifyGroup = document.getElementById('spotifyGroup');
+      if (spotifyGroup) spotifyGroup.style.display = 'none';
+      const recVideo = document.getElementById('recVideo');
+      if (recVideo) recVideo.value = '';
+      const videoGroup = document.getElementById('videoGroup');
+      if (videoGroup) videoGroup.style.display = 'none';
       const det = document.getElementById('recDetalles');
       if (det) det.value = '';
 
@@ -1624,6 +1652,7 @@
           document.getElementById('subcatGroup').style.display = btn.dataset.cat === 'musica' ? 'block' : 'none';
           if (btn.dataset.cat !== 'musica') state.formNew.subcategoria = null;
           updateCreadorField(btn.dataset.cat);
+          updateExtraFields(btn.dataset.cat, state.formNew.subcategoria);
         });
       });
       document.querySelectorAll('#subcatRow .subcat-btn').forEach(btn => {
@@ -1631,6 +1660,7 @@
           document.querySelectorAll('#subcatRow .subcat-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
           btn.setAttribute('aria-pressed', 'true');
           state.formNew.subcategoria = btn.dataset.subcat;
+          updateExtraFields(state.formNew.categoria, state.formNew.subcategoria);
         });
       });
       document.getElementById('submitRec').addEventListener('click', submitRec);
@@ -1655,6 +1685,33 @@
       }
     }
 
+    function updateExtraFields(categoria, subcategoria) {
+      const spotifyGroup = document.getElementById('spotifyGroup');
+      const videoGroup = document.getElementById('videoGroup');
+      const recSpotify = document.getElementById('recSpotify');
+      const recVideo = document.getElementById('recVideo');
+      if (!spotifyGroup || !videoGroup) return;
+      
+      // Spotify: solo para música canción / álbum / artista
+      const isSpotifyKind = categoria === 'musica' && ['cancion', 'album', 'artista'].includes(subcategoria);
+      // Video YouTube: solo para concierto (música)
+      const isConcierto = categoria === 'musica' && subcategoria === 'concierto';
+      
+      if (isSpotifyKind) {
+        spotifyGroup.style.display = 'block';
+      } else {
+        spotifyGroup.style.display = 'none';
+        if (recSpotify) recSpotify.value = '';
+      }
+      
+      if (isConcierto) {
+        videoGroup.style.display = 'block';
+      } else {
+        videoGroup.style.display = 'none';
+        if (recVideo) recVideo.value = '';
+      }
+    }
+
     async function submitRec() {
       const btn = document.getElementById('submitRec');
       const titulo = document.getElementById('recTitulo').value.trim();
@@ -1662,14 +1719,26 @@
       const detalles = (document.getElementById('recDetalles').value || '').trim();
       const creadorInput = document.getElementById('recCreador');
       const creador = creadorInput ? creadorInput.value.trim() : '';
+      const spotifyInput = document.getElementById('recSpotify');
+      const enlace_spotify = spotifyInput ? spotifyInput.value.trim() : '';
+      const videoInput = document.getElementById('recVideo');
+      const video_url = videoInput ? videoInput.value.trim() : '';
+      
       if (!state.formNew.categoria) return toast('Elige una categoría', 'error');
       if (state.formNew.categoria === 'musica' && !state.formNew.subcategoria) return toast('Elige tipo de música', 'error');
       if (!titulo) return toast('Escribe un título', 'error');
-      // Música y libros: creador es muy útil para enriquecer bien
       if ((state.formNew.categoria === 'libros' || state.formNew.categoria === 'musica') && !creador) {
         const tipo = state.formNew.categoria === 'libros' ? 'autor/a' : 'artista';
         return toast(`Escribe el ${tipo} para encontrar la obra`, 'error');
       }
+      // Validar URLs si vienen
+      if (enlace_spotify && !/spotify\.com\/(track|album|artist)/.test(enlace_spotify)) {
+        return toast('El enlace de Spotify no parece válido', 'error');
+      }
+      if (video_url && !/(youtube\.com\/watch|youtu\.be\/)/.test(video_url)) {
+        return toast('El enlace de YouTube no parece válido', 'error');
+      }
+      
       btn.disabled = true;
       btn.textContent = 'Enriqueciendo con IA... ✨';
       try {
@@ -1682,6 +1751,8 @@
           comentario,
           detalles,
           creador,
+          enlace_spotify,
+          video_url,
           dirigido_a,
         });
         toast(dirigido_a ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
