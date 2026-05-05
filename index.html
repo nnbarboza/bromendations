@@ -8,7 +8,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="BROmendations">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="img/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="img/icon-512.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="img/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BROmendations">
   <base href="/bromendations/">
   <title>BROmendations</title>
 
@@ -99,7 +105,11 @@
       20% { transform: rotate(-8deg); }
       40%, 50% { transform: rotate(14deg); }
     }
-    .home-header p { margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 22ch; }
+    .home-header p {
+      margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 32ch;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
     .home-header .deco {
       position: absolute; top: -8px; right: -8px;
       width: 96px; height: 96px;
@@ -735,7 +745,7 @@
 
   <div class="user-picker" id="userPicker">
     <div class="user-picker-inner">
-      <h1>Bienvenid@ a <span class="accent">BROmendations</span></h1>
+      <h1><span class="accent">BROmendations</span></h1>
       <p>¿Quién eres?</p>
       <div class="user-grid" id="userGrid"></div>
     </div>
@@ -750,7 +760,7 @@
           <span class="bell-dot" id="bellDot" style="display:none;">0</span>
         </a>
         <h1>¡Hola <span id="userName">...</span>! <span class="wave">👋</span></h1>
-        <p>Descubre y comparte recomendaciones culturales en familia</p>
+        <p>No todo tiene un límite. Descubrí y recomendá a la flia.</p>
       </header>
 
       <div class="categories">
@@ -804,7 +814,7 @@
       </div>
 
       <div class="section-head">
-        <h2><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg> Últimas recomendaciones</h2>
+        <h2><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 7.5H22l-6.2 4.7L18.4 22 12 17.3 5.6 22l2.6-7.8L2 9.5h7.4z"/></svg> Novedades</h2>
         <a href="#/novedades">Ver todas <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
       </div>
       <div class="recs-carousel" id="recsRow"></div>
@@ -851,6 +861,11 @@
         <div class="form-group">
           <label class="form-label" for="recTitulo">Título</label>
           <input type="text" id="recTitulo" class="form-input" placeholder="Ej: Cien años de soledad">
+        </div>
+
+        <div class="form-group" id="creadorGroup" style="display:none;">
+          <label class="form-label" for="recCreador" id="creadorLabel">Autor/a</label>
+          <input type="text" id="recCreador" class="form-input" placeholder="Ej: Gabriel García Márquez">
         </div>
 
         <div class="form-group">
@@ -975,7 +990,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.5.2';
+    const APP_VERSION = '0.6.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1522,24 +1537,28 @@
       document.getElementById('perfilSubtitle').textContent =
         `${myRecs.length} recomendacion${myRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
 
+      const isUserAdmin = String(u.admin).toUpperCase() === 'TRUE';
+
       const content = document.getElementById('perfilContent');
       content.innerHTML = `
-        <div class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4); margin-bottom: var(--s-4);">
+        <div class="rec-card" style="flex-direction:row; align-items:center; gap: var(--s-4); padding: var(--s-4); margin-bottom: var(--s-3);">
           ${avatarHTML(u.username, 'lg', 64)}
           <div style="flex:1;">
             <h3 style="font-family:var(--font-display); margin:0 0 4px; font-size:20px;">${u.nombre}</h3>
-            <p style="margin:0; color:var(--ink-soft); font-size:13px;">@${u.username}${String(u.admin).toUpperCase() === 'TRUE' ? ' · admin ⭐' : ''}</p>
+            <p style="margin:0; color:var(--ink-soft); font-size:13px;">@${u.username}${isUserAdmin ? ' · admin ⭐' : ''}</p>
           </div>
         </div>
+
+        ${isUserAdmin ? `
+          <div style="margin-bottom: var(--s-4); text-align:center;">
+            <button class="btn-ghost" onclick="logout()" style="font-size:13px;">🔄 Cambiar de usuario</button>
+          </div>
+        ` : ''}
 
         <h2 style="font-family:var(--font-display); font-size:22px; margin: var(--s-5) 0 var(--s-3);">Mis recomendaciones</h2>
         ${myRecs.length
           ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
           : emptyStateHTML('✨', 'No has recomendado nada aún', 'Pulsa el botón verde para empezar.')}
-
-        <div style="margin-top: var(--s-5); text-align:center;">
-          <button class="btn-ghost" onclick="logout()">Cambiar de usuario</button>
-        </div>
       `;
     }
     function logout() {
@@ -1559,6 +1578,10 @@
       document.getElementById('subcatGroup').style.display = 'none';
       document.getElementById('recTitulo').value = '';
       document.getElementById('recComentario').value = '';
+      const recCreador = document.getElementById('recCreador');
+      if (recCreador) recCreador.value = '';
+      const creadorGroup = document.getElementById('creadorGroup');
+      if (creadorGroup) creadorGroup.style.display = 'none';
       const det = document.getElementById('recDetalles');
       if (det) det.value = '';
 
@@ -1600,6 +1623,7 @@
           state.formNew.categoria = btn.dataset.cat;
           document.getElementById('subcatGroup').style.display = btn.dataset.cat === 'musica' ? 'block' : 'none';
           if (btn.dataset.cat !== 'musica') state.formNew.subcategoria = null;
+          updateCreadorField(btn.dataset.cat);
         });
       });
       document.querySelectorAll('#subcatRow .subcat-btn').forEach(btn => {
@@ -1612,14 +1636,40 @@
       document.getElementById('submitRec').addEventListener('click', submitRec);
     }
 
+    function updateCreadorField(categoria) {
+      const group = document.getElementById('creadorGroup');
+      const label = document.getElementById('creadorLabel');
+      const input = document.getElementById('recCreador');
+      if (!group) return;
+      if (categoria === 'libros') {
+        group.style.display = 'block';
+        label.textContent = 'Autor/a';
+        input.placeholder = 'Ej: Gabriel García Márquez';
+      } else if (categoria === 'musica') {
+        group.style.display = 'block';
+        label.textContent = 'Artista';
+        input.placeholder = 'Ej: Radiohead';
+      } else {
+        group.style.display = 'none';
+        input.value = '';
+      }
+    }
+
     async function submitRec() {
       const btn = document.getElementById('submitRec');
       const titulo = document.getElementById('recTitulo').value.trim();
       const comentario = document.getElementById('recComentario').value.trim();
       const detalles = (document.getElementById('recDetalles').value || '').trim();
+      const creadorInput = document.getElementById('recCreador');
+      const creador = creadorInput ? creadorInput.value.trim() : '';
       if (!state.formNew.categoria) return toast('Elige una categoría', 'error');
       if (state.formNew.categoria === 'musica' && !state.formNew.subcategoria) return toast('Elige tipo de música', 'error');
       if (!titulo) return toast('Escribe un título', 'error');
+      // Música y libros: creador es muy útil para enriquecer bien
+      if ((state.formNew.categoria === 'libros' || state.formNew.categoria === 'musica') && !creador) {
+        const tipo = state.formNew.categoria === 'libros' ? 'autor/a' : 'artista';
+        return toast(`Escribe el ${tipo} para encontrar la obra`, 'error');
+      }
       btn.disabled = true;
       btn.textContent = 'Enriqueciendo con IA... ✨';
       try {
@@ -1631,6 +1681,7 @@
           titulo,
           comentario,
           detalles,
+          creador,
           dirigido_a,
         });
         toast(dirigido_a ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
@@ -1730,7 +1781,7 @@
             ${r.creador ? `<p><strong>${getCreadorLabel(r.categoria)}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
             ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
             ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
-            ${r.plataformas ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
+            ${r.plataformas && r.categoria !== 'libros' ? `<p><strong>Disponible en:</strong> ${escapeHTML(r.plataformas)}</p>` : ''}
             ${r.rotten_tomatoes ? `<p><strong>Rotten Tomatoes:</strong> ${formatRT(r.rotten_tomatoes)}</p>` : ''}
             ${showLink ? `<p style="margin-top:var(--s-3);"><a href="${r.enlace_principal}" target="_blank" rel="noopener" style="color:var(--c-action); font-weight:600;">${linkLabel(r.enlace_principal)} →</a></p>` : ''}
             ${(isMine || isAdmin()) ? `<p style="margin-top:var(--s-3); text-align:right;"><button class="btn-ghost" id="reEnrichBtn" style="font-size:12px;">🔄 Regenerar info</button></p>` : ''}
