@@ -364,6 +364,46 @@
     }
     .screen-header p { color: var(--ink-soft); font-size: 14px; margin: 0; }
 
+    /* Familia: imagen hero + créditos */
+    .familia-hero {
+      width: 100%;
+      margin: var(--s-3) 0 var(--s-6);
+      display: flex;
+      justify-content: center;
+    }
+    .familia-hero img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+    }
+    /* Si la imagen falla y el listener global le pone data-fallback como contenido */
+    .familia-hero img.broken {
+      display: none;
+    }
+    .familia-hero .hero-placeholder {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE8D9 100%);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      opacity: 0.7;
+    }
+    .familia-credits {
+      margin-top: var(--s-7);
+      padding: var(--s-5) var(--s-3) var(--s-3);
+      text-align: center;
+      color: var(--gray-300);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+    .familia-credits p { margin: 0; }
+    .familia-credits p + p { margin-top: 2px; }
+
     .placeholder-box {
       background: var(--surface); border-radius: var(--radius);
       padding: var(--s-6) var(--s-5);
@@ -643,6 +683,80 @@
       border-color: var(--ink);
       background: var(--ink);
       color: white;
+    }
+
+    /* Fila combinada: filtros + dropdown de orden */
+    .filter-sort-row {
+      display: flex;
+      align-items: center;
+      gap: var(--s-2);
+      margin-bottom: var(--s-3);
+    }
+    .filter-sort-row .cat-filter {
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .sort-dropdown {
+      flex: 0 0 auto;
+      position: relative;
+    }
+    .sort-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 10px 8px 12px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--gray-100);
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .sort-dropdown-btn:hover { border-color: var(--gray-300); }
+    .sort-dropdown-btn svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .sort-dropdown.open .sort-dropdown-btn svg { transform: rotate(180deg); }
+    .sort-dropdown.open .sort-dropdown-btn { border-color: var(--ink); color: var(--ink); }
+    .sort-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--gray-100);
+      min-width: 180px;
+      z-index: 50;
+      overflow: hidden;
+      display: none;
+    }
+    .sort-dropdown.open .sort-dropdown-menu { display: block; }
+    .sort-option {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .sort-option:hover { background: var(--gray-50); }
+    .sort-option[aria-selected="true"] {
+      background: var(--gray-50);
+      color: var(--c-action);
+      font-weight: 700;
     }
 
     /* Badge "Para ti" en tarjetas dirigidas */
@@ -1123,7 +1237,14 @@
           <p>De Bermejo al mundo.</p>
         </div>
       </header>
+      <div class="familia-hero">
+        <img id="familiaHeroImg" src="img/familia.png" alt="" data-fallback="🏡" data-fallback-class="hero-placeholder">
+      </div>
       <div id="bromendatorsList"></div>
+      <footer class="familia-credits">
+        <p>BROmendations© 2026 · v<span id="familiaVersion">2.0</span></p>
+        <p>Diseñada y desarrollada en Barcelona por Nico con 🔥</p>
+      </footer>
     </section>
 
     <section class="screen" id="screen-perfil">
@@ -1209,7 +1330,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.9.0';
+    const APP_VERSION = '2.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1761,26 +1882,62 @@
     function renderCategoria(cat) {
       const c = CATEGORIES[cat];
       if (!c) { location.hash = '#/'; return; }
+      const sortKey = state.categoriaSort || 'date';
       document.getElementById('catTitle').textContent = c.nombre;
-      const recs = state.data.recomendaciones
-        .filter(r => r.categoria === cat)
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const allRecs = state.data.recomendaciones.filter(r => r.categoria === cat);
+      const recs = sortRecs(allRecs, sortKey);
       document.getElementById('catSubtitle').textContent =
         recs.length === 1 ? '1 recomendación' : `${recs.length} recomendaciones`;
       const list = document.getElementById('catList');
-      list.innerHTML = recs.length
-        ? recs.map(recListItemHTML).join('')
-        : emptyStateHTML(c.emoji, 'Sin recomendaciones todavía', 'Sé el primero en recomendar algo aquí.');
+      if (!recs.length) {
+        list.innerHTML = emptyStateHTML(c.emoji, 'Sin recomendaciones todavía', 'Sé el primero en recomendar algo aquí.');
+        return;
+      }
+      list.innerHTML = `
+        <div class="filter-sort-row" style="justify-content: flex-end;">
+          ${sortDropdownHTML(sortKey, 'categoria')}
+        </div>
+        <div class="rec-list">${recs.map(recListItemHTML).join('')}</div>
+      `;
+      bindSortDropdown('categoria', (sort) => {
+        state.categoriaSort = sort;
+        renderCategoria(cat);
+      });
     }
 
     /* ========== RENDER: NOVEDADES ========== */
     function renderNovedades() {
-      const allRecs = [...state.data.recomendaciones]
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      const forMe = recsForMe();
+      const filter = state.novedadesFilter || 'all';
+      const sortKey = state.novedadesSort || 'date';
+
+      const allRecsRaw = [...state.data.recomendaciones];
+      const forMeRaw = recsForMe();
+
+      // Aplicar filtro de categoría
+      const allFiltered = filter === 'all' ? allRecsRaw : allRecsRaw.filter(r => r.categoria === filter);
+      const forMeFiltered = filter === 'all' ? forMeRaw : forMeRaw.filter(r => r.categoria === filter);
+
+      // Aplicar orden
+      const allRecs = sortRecs(allFiltered, sortKey);
+      const forMe = sortRecs(forMeFiltered, sortKey);
+
       const list = document.getElementById('novedadesList');
 
-      // Sección "Para ti" si hay alguna dirigida
+      // Si no hay nada en absoluto en cualquier categoría
+      if (allRecsRaw.length === 0) {
+        list.innerHTML = emptyStateHTML('✨', 'Aún no hay novedades', 'Cuando alguien recomiende algo, aparecerá aquí.');
+        return;
+      }
+
+      // Fila de filtros + dropdown
+      const controlsHTML = `
+        <div class="filter-sort-row">
+          ${categoryFilterHTML(filter, 'novedades')}
+          ${sortDropdownHTML(sortKey, 'novedades')}
+        </div>
+      `;
+
+      // Sección "Para ti"
       const forYouHTML = forMe.length ? `
         <div class="for-you-section">
           <div class="section-head" style="margin-bottom: var(--s-3);">
@@ -1794,13 +1951,29 @@
       const generalHTML = allRecs.length ? `
         ${forMe.length ? `<h2 style="font-family:var(--font-display); font-size:22px; margin: 0 0 var(--s-3);">Todas las novedades</h2>` : ''}
         <div class="rec-list">${allRecs.map(recListItemHTML).join('')}</div>
-      ` : emptyStateHTML('✨', 'Aún no hay novedades', 'Cuando alguien recomiende algo, aparecerá aquí.');
+      ` : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay recomendaciones en esta categoría.</p>`;
 
-      list.innerHTML = forYouHTML + generalHTML;
+      list.innerHTML = controlsHTML + forYouHTML + generalHTML;
+
+      // Listeners filtro de categoría
+      list.querySelectorAll('#novedades-filter .cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.novedadesFilter = btn.dataset.cat;
+          renderNovedades();
+        });
+      });
+      // Listener dropdown
+      bindSortDropdown('novedades', (sort) => {
+        state.novedadesSort = sort;
+        renderNovedades();
+      });
     }
 
     /* ========== RENDER: BROMENDATORS ========== */
     function renderBromendators() {
+      // Pintar versión en créditos
+      const verEl = document.getElementById('familiaVersion');
+      if (verEl) verEl.textContent = APP_VERSION;
       const list = document.getElementById('bromendatorsList');
       const usuarios = (state.data.usuarios || []).filter(u => String(u.activo).toUpperCase() !== 'FALSE');
       list.innerHTML = `
@@ -1829,20 +2002,23 @@
       if (!u) { location.hash = '#/bromendators'; return; }
       document.getElementById('bromendatorName').textContent = u.nombre;
       const filter = state.bromendatorFilter || 'all';
-      const allRecs = state.data.recomendaciones
-        .filter(r => r.autor === username)
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      const recs = filter === 'all' ? allRecs : allRecs.filter(r => r.categoria === filter);
-      document.getElementById('bromendatorMeta').textContent = allRecs.length === 1 ? '1 recomendación' : `${allRecs.length} recomendaciones`;
+      const sortKey = state.bromendatorSort || 'date';
+      const baseRecs = state.data.recomendaciones.filter(r => r.autor === username);
+      const filtered = filter === 'all' ? baseRecs : baseRecs.filter(r => r.categoria === filter);
+      const recs = sortRecs(filtered, sortKey);
+      document.getElementById('bromendatorMeta').textContent = baseRecs.length === 1 ? '1 recomendación' : `${baseRecs.length} recomendaciones`;
       const content = document.getElementById('bromendatorContent');
       
-      if (allRecs.length === 0) {
+      if (baseRecs.length === 0) {
         content.innerHTML = emptyStateHTML('🤔', `${u.nombre} aún no recomienda nada`, '¡Anímalo a compartir!');
         return;
       }
       
       content.innerHTML = `
-        ${categoryFilterHTML(filter, 'bromendator')}
+        <div class="filter-sort-row">
+          ${categoryFilterHTML(filter, 'bromendator')}
+          ${sortDropdownHTML(sortKey, 'bromendator')}
+        </div>
         ${recs.length
           ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
           : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">${u.nombre} no tiene recomendaciones en esta categoría.</p>`}
@@ -1854,9 +2030,96 @@
           renderBromendator(username);
         });
       });
+      bindSortDropdown('bromendator', (sort) => {
+        state.bromendatorSort = sort;
+        renderBromendator(username);
+      });
     }
 
     /* ========== RENDER: BIBLIOTECA ========== */
+
+    /* Helper: promedio de valoraciones por rec.id (sin valoraciones → -Infinity para ir al final) */
+    function getAvgRating(recId) {
+      const vals = state.data.valoraciones.filter(v => String(v.recomendacion_id) === String(recId));
+      if (!vals.length) return null;
+      let sum = 0, count = 0;
+      vals.forEach(v => {
+        const n = parseFloat(v.estrellas);
+        if (!isNaN(n)) { sum += n; count++; }
+      });
+      return count ? sum / count : null;
+    }
+
+    /* Helper: ordenar recs según criterio */
+    function sortRecs(recs, sortKey) {
+      const sorted = [...recs];
+      if (sortKey === 'rating') {
+        sorted.sort((a, b) => {
+          const ra = getAvgRating(a.id);
+          const rb = getAvgRating(b.id);
+          // Sin valoración va al final
+          if (ra === null && rb === null) return new Date(b.timestamp) - new Date(a.timestamp);
+          if (ra === null) return 1;
+          if (rb === null) return -1;
+          if (rb !== ra) return rb - ra;
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+      } else {
+        // 'date' por defecto
+        sorted.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      }
+      return sorted;
+    }
+
+    /* HTML del dropdown de ordenación */
+    function sortDropdownHTML(activeSort, idPrefix) {
+      const options = [
+        { key: 'date',   label: 'Más recientes' },
+        { key: 'rating', label: 'Mejor valoradas' },
+      ];
+      const activeLabel = (options.find(o => o.key === activeSort) || options[0]).label;
+      return `
+        <div class="sort-dropdown" id="${idPrefix}-sort">
+          <button class="sort-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>${activeLabel}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sort-dropdown-menu" role="menu">
+            ${options.map(o => `
+              <button class="sort-option" type="button" role="menuitemradio" data-sort="${o.key}" aria-selected="${activeSort === o.key}">${o.label}</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    /* Conecta los listeners del dropdown a un callback */
+    function bindSortDropdown(idPrefix, onSelect) {
+      const wrapper = document.getElementById(`${idPrefix}-sort`);
+      if (!wrapper) return;
+      const btn = wrapper.querySelector('.sort-dropdown-btn');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        wrapper.classList.toggle('open');
+        btn.setAttribute('aria-expanded', wrapper.classList.contains('open'));
+      });
+      wrapper.querySelectorAll('.sort-option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wrapper.classList.remove('open');
+          onSelect(opt.dataset.sort);
+        });
+      });
+    }
+
+    /* Cerrar dropdowns abiertos al click fuera (listener global, una sola vez) */
+    if (!window.__sortDropdownGlobalBound) {
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.sort-dropdown.open').forEach(d => d.classList.remove('open'));
+      });
+      window.__sortDropdownGlobalBound = true;
+    }
+
     function categoryFilterHTML(activeFilter, idPrefix) {
       const cats = [
         { key: 'all',       label: 'Todas',     emoji: '✨' },
@@ -1878,22 +2141,25 @@
     
     function renderBiblioteca() {
       const filter = state.bibliotecaFilter || 'all';
+      const sortKey = state.bibliotecaSort || 'date';
       const myConsumido = state.data.consumido.filter(c => c.usuario === state.currentUser);
       const recIds = new Set(myConsumido.map(c => c.recomendacion_id));
-      const allRecs = state.data.recomendaciones
-        .filter(r => recIds.has(r.id))
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      const recs = filter === 'all' ? allRecs : allRecs.filter(r => r.categoria === filter);
+      const baseRecs = state.data.recomendaciones.filter(r => recIds.has(r.id));
+      const filtered = filter === 'all' ? baseRecs : baseRecs.filter(r => r.categoria === filter);
+      const recs = sortRecs(filtered, sortKey);
       
       const list = document.getElementById('bibliotecaList');
       
-      if (allRecs.length === 0) {
+      if (baseRecs.length === 0) {
         list.innerHTML = emptyStateHTML('📖', 'Tu biblioteca está vacía', 'Cuando valores recomendaciones, aparecerán aquí.');
         return;
       }
       
       list.innerHTML = `
-        ${categoryFilterHTML(filter, 'biblioteca')}
+        <div class="filter-sort-row">
+          ${categoryFilterHTML(filter, 'biblioteca')}
+          ${sortDropdownHTML(sortKey, 'biblioteca')}
+        </div>
         ${recs.length
           ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
           : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay nada en esta categoría aún.</p>`}
@@ -1906,6 +2172,10 @@
           renderBiblioteca();
         });
       });
+      bindSortDropdown('biblioteca', (sort) => {
+        state.bibliotecaSort = sort;
+        renderBiblioteca();
+      });
     }
 
     /* ========== RENDER: PERFIL ========== */
@@ -1913,14 +2183,14 @@
       const u = getUserBy(state.currentUser);
       if (!u) return;
       const filter = state.perfilFilter || 'all';
-      const allMyRecs = state.data.recomendaciones
-        .filter(r => r.autor === state.currentUser)
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      const myRecs = filter === 'all' ? allMyRecs : allMyRecs.filter(r => r.categoria === filter);
+      const sortKey = state.perfilSort || 'date';
+      const baseRecs = state.data.recomendaciones.filter(r => r.autor === state.currentUser);
+      const filtered = filter === 'all' ? baseRecs : baseRecs.filter(r => r.categoria === filter);
+      const myRecs = sortRecs(filtered, sortKey);
       const myVals = state.data.valoraciones.filter(v => v.usuario === state.currentUser);
 
       document.getElementById('perfilSubtitle').textContent =
-        `${allMyRecs.length} recomendacion${allMyRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
+        `${baseRecs.length} recomendacion${baseRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
 
       const isUserAdmin = String(u.admin).toUpperCase() === 'TRUE';
 
@@ -1942,8 +2212,13 @@
         ` : ''}
 
         <h2 style="font-family:var(--font-display); font-size:22px; margin: var(--s-5) 0 var(--s-3);">Mis recomendaciones</h2>
-        ${allMyRecs.length ? categoryFilterHTML(filter, 'perfil') : ''}
-        ${allMyRecs.length === 0
+        ${baseRecs.length ? `
+          <div class="filter-sort-row">
+            ${categoryFilterHTML(filter, 'perfil')}
+            ${sortDropdownHTML(sortKey, 'perfil')}
+          </div>
+        ` : ''}
+        ${baseRecs.length === 0
           ? emptyStateHTML('✨', 'No has recomendado nada aún', 'Pulsa el botón verde para empezar.')
           : (myRecs.length
               ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
@@ -1956,6 +2231,10 @@
           state.perfilFilter = btn.dataset.cat;
           renderPerfil();
         });
+      });
+      bindSortDropdown('perfil', (sort) => {
+        state.perfilSort = sort;
+        renderPerfil();
       });
     }
     function logout() {
@@ -2284,7 +2563,7 @@
       }
       
       btn.disabled = true;
-      showBusy('Compartiendo recomendación…', 'Buscando información en internet 🔍');
+      showBusy('Compartiendo recomendación…', 'Buscando info en el modular naranja 🔍');
       try {
         const dirigido_a = (state.formNew.destinatarios || []).join(',');
         const res = await apiGet('createRec', {
@@ -2583,6 +2862,20 @@
       const editBtn = document.getElementById('editRec');
       if (editBtn) {
         editBtn.addEventListener('click', () => {
+          // Construir lista de destinatarios posibles (todos activos menos el autor)
+          const destinatariosActuales = parseDirigidoA(r.dirigido_a);
+          const usuariosDisp = (state.data.usuarios || [])
+            .filter(u => String(u.activo).toUpperCase() !== 'FALSE' && u.username !== r.autor);
+          const recipientPillsHTML = usuariosDisp.map(u => {
+            const pressed = destinatariosActuales.includes(u.username);
+            return `
+              <button type="button" class="recipient-pill edit-recipient-pill" data-username="${u.username}" aria-pressed="${pressed}">
+                ${avatarHTML(u.username)}
+                <span>${escapeHTML(u.nombre)}</span>
+              </button>
+            `;
+          }).join('');
+
           showModal({
             title: 'Editar recomendación',
             bodyHtml: `
@@ -2594,8 +2887,15 @@
                 <label class="form-label" for="editComentario">Tu comentario</label>
                 <textarea id="editComentario" class="form-textarea" rows="3">${escapeHTML(r.comentario_autor || '')}</textarea>
               </div>
+              <div class="form-group">
+                <label class="form-label">¿Para quién es?</label>
+                <div class="recipient-row" id="editRecipientRow">${recipientPillsHTML}</div>
+                <span style="display:block; font-size:11px; color:var(--ink-soft); margin-top:4px;">
+                  Dejar vacío para que sea para toda la familia.
+                </span>
+              </div>
               <p style="font-size:12px; color:var(--ink-soft); margin: var(--s-2) 0 0;">
-                Si quieres cambiar la información autogenerada (sinopsis, póster, etc.), usa "Regenerar info" en su lugar.
+                Si querés cambiar la información autogenerada (sinopsis, póster, etc.), usá "Regenerar info" en su lugar.
               </p>
             `,
             secondaryLabel: 'Cancelar',
@@ -2604,8 +2904,18 @@
               const newTitle = document.getElementById('editTitulo').value.trim();
               const newComment = document.getElementById('editComentario').value.trim();
               if (!newTitle) { toast('El título no puede estar vacío', 'error'); return; }
+              // Recolectar destinatarios marcados
+              const newDest = [];
+              document.querySelectorAll('#editRecipientRow .edit-recipient-pill[aria-pressed="true"]').forEach(btn => {
+                newDest.push(btn.dataset.username);
+              });
               try {
-                await apiGet('updateRec', { id: r.id, titulo: newTitle, comentario: newComment });
+                await apiGet('updateRec', {
+                  id: r.id,
+                  titulo: newTitle,
+                  comentario: newComment,
+                  dirigido_a: newDest.join(','),
+                });
                 closeModal();
                 toast('Actualizada ✏️', 'success');
                 await loadData({ silent: true });
@@ -2615,23 +2925,46 @@
               }
             },
           });
+
+          // Listeners de los pills (toggle aria-pressed)
+          document.querySelectorAll('#editRecipientRow .edit-recipient-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const pressed = btn.getAttribute('aria-pressed') === 'true';
+              btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+            });
+          });
         });
       }
       const delRecBtn = document.getElementById('deleteRec');
       if (delRecBtn) {
-        delRecBtn.addEventListener('click', async () => {
-          if (!confirm('¿Borrar esta recomendación? No se puede deshacer.')) return;
-          showBusy('Borrando recomendación…', 'Un momento por favor');
-          try {
-            await apiGet('deleteRec', { id: r.id });
-            await loadData({ silent: true });
-            hideBusy();
-            toast('Borrada', 'success');
-            location.hash = '#/';
-          } catch (err) {
-            hideBusy();
-            toast('Error: ' + err.message, 'error');
-          }
+        delRecBtn.addEventListener('click', () => {
+          showModal({
+            title: 'Borrar recomendación',
+            bodyHtml: `
+              <p style="margin: 0 0 var(--s-3); font-size: 15px;">
+                ¿Seguro que querés borrar <strong>${escapeHTML(r.titulo)}</strong>?
+              </p>
+              <p style="margin: 0; font-size: 12px; color: var(--ink-soft);">
+                Esto quedará entre el niñito Jesús y vos.
+              </p>
+            `,
+            secondaryLabel: 'Cancelar',
+            primaryLabel: '🗑️ Sí, borrar',
+            onSubmit: async () => {
+              closeModal();
+              showBusy('Borrando recomendación…', 'Un momento por favor');
+              try {
+                await apiGet('deleteRec', { id: r.id });
+                await loadData({ silent: true });
+                hideBusy();
+                toast('Borrada', 'success');
+                location.hash = '#/';
+              } catch (err) {
+                hideBusy();
+                toast('Error: ' + err.message, 'error');
+              }
+            },
+          });
         });
       }
 
