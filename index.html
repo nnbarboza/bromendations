@@ -363,11 +363,17 @@
       letter-spacing: -0.5px;
     }
     .screen-header p { color: var(--ink-soft); font-size: 14px; margin: 0; }
+    .screen-header .header-actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+    .screen-header .header-actions:empty { display: none; }
 
     /* Familia: imagen hero + créditos */
     .familia-hero {
       width: 100%;
-      margin: var(--s-3) 0 var(--s-6);
+      margin: calc(-1 * var(--s-3)) 0 var(--s-4);
       display: flex;
       justify-content: center;
     }
@@ -697,6 +703,12 @@
       min-width: 0;
       margin-bottom: 0;
       padding-bottom: 0;
+    }
+    /* Fila aparte solo con el dropdown (Mi perfil) */
+    .sort-row-standalone {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: var(--s-3);
     }
     .sort-dropdown {
       flex: 0 0 auto;
@@ -1132,6 +1144,7 @@
           <h1>Biblioteca</h1>
           <p>Lo que has consumido y valorado</p>
         </div>
+        <div class="header-actions" id="bibliotecaHeaderActions"></div>
       </header>
       <div id="bibliotecaList"></div>
     </section>
@@ -1253,6 +1266,7 @@
           <h1>Mi perfil</h1>
           <p id="perfilSubtitle">Tu actividad</p>
         </div>
+        <div class="header-actions" id="perfilHeaderActions"></div>
       </header>
       <div id="perfilContent"></div>
     </section>
@@ -1264,6 +1278,7 @@
           <h1 id="catTitle">Categoría</h1>
           <p id="catSubtitle">Recomendaciones</p>
         </div>
+        <div class="header-actions" id="categoriaHeaderActions"></div>
       </header>
       <div class="rec-list" id="catList"></div>
     </section>
@@ -1275,6 +1290,7 @@
           <h1>Novedades</h1>
           <p>Todas las recomendaciones por fecha</p>
         </div>
+        <div class="header-actions" id="novedadesHeaderActions"></div>
       </header>
       <div class="rec-list" id="novedadesList"></div>
     </section>
@@ -1297,6 +1313,7 @@
           <h1 id="bromendatorName">...</h1>
           <p id="bromendatorMeta">...</p>
         </div>
+        <div class="header-actions" id="bromendatorHeaderActions"></div>
       </header>
       <div id="bromendatorContent"></div>
     </section>
@@ -1889,17 +1906,14 @@
       document.getElementById('catSubtitle').textContent =
         recs.length === 1 ? '1 recomendación' : `${recs.length} recomendaciones`;
       const list = document.getElementById('catList');
+      const headerSlot = document.getElementById('categoriaHeaderActions');
       if (!recs.length) {
+        if (headerSlot) headerSlot.innerHTML = '';
         list.innerHTML = emptyStateHTML(c.emoji, 'Sin recomendaciones todavía', 'Sé el primero en recomendar algo aquí.');
         return;
       }
-      list.innerHTML = `
-        <div class="filter-sort-row" style="justify-content: flex-end;">
-          ${sortDropdownHTML(sortKey, 'categoria')}
-        </div>
-        <div class="rec-list">${recs.map(recListItemHTML).join('')}</div>
-      `;
-      bindSortDropdown('categoria', (sort) => {
+      list.innerHTML = `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`;
+      renderHeaderSort('categoriaHeaderActions', 'categoria', sortKey, (sort) => {
         state.categoriaSort = sort;
         renderCategoria(cat);
       });
@@ -1922,20 +1936,14 @@
       const forMe = sortRecs(forMeFiltered, sortKey);
 
       const list = document.getElementById('novedadesList');
+      const headerSlot = document.getElementById('novedadesHeaderActions');
 
       // Si no hay nada en absoluto en cualquier categoría
       if (allRecsRaw.length === 0) {
+        if (headerSlot) headerSlot.innerHTML = '';
         list.innerHTML = emptyStateHTML('✨', 'Aún no hay novedades', 'Cuando alguien recomiende algo, aparecerá aquí.');
         return;
       }
-
-      // Fila de filtros + dropdown
-      const controlsHTML = `
-        <div class="filter-sort-row">
-          ${categoryFilterHTML(filter, 'novedades')}
-          ${sortDropdownHTML(sortKey, 'novedades')}
-        </div>
-      `;
 
       // Sección "Para ti"
       const forYouHTML = forMe.length ? `
@@ -1953,17 +1961,20 @@
         <div class="rec-list">${allRecs.map(recListItemHTML).join('')}</div>
       ` : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay recomendaciones en esta categoría.</p>`;
 
-      list.innerHTML = controlsHTML + forYouHTML + generalHTML;
+      // Filtros de categoría arriba (sin dropdown, ahora va en el header)
+      const filtersHTML = `${categoryFilterHTML(filter, 'novedades')}`;
 
-      // Listeners filtro de categoría
+      list.innerHTML = filtersHTML + forYouHTML + generalHTML;
+
+      // Listener filtro de categoría
       list.querySelectorAll('#novedades-filter .cat-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.novedadesFilter = btn.dataset.cat;
           renderNovedades();
         });
       });
-      // Listener dropdown
-      bindSortDropdown('novedades', (sort) => {
+      // Dropdown en el header
+      renderHeaderSort('novedadesHeaderActions', 'novedades', sortKey, (sort) => {
         state.novedadesSort = sort;
         renderNovedades();
       });
@@ -2008,17 +2019,16 @@
       const recs = sortRecs(filtered, sortKey);
       document.getElementById('bromendatorMeta').textContent = baseRecs.length === 1 ? '1 recomendación' : `${baseRecs.length} recomendaciones`;
       const content = document.getElementById('bromendatorContent');
+      const headerSlot = document.getElementById('bromendatorHeaderActions');
       
       if (baseRecs.length === 0) {
+        if (headerSlot) headerSlot.innerHTML = '';
         content.innerHTML = emptyStateHTML('🤔', `${u.nombre} aún no recomienda nada`, '¡Anímalo a compartir!');
         return;
       }
       
       content.innerHTML = `
-        <div class="filter-sort-row">
-          ${categoryFilterHTML(filter, 'bromendator')}
-          ${sortDropdownHTML(sortKey, 'bromendator')}
-        </div>
+        ${categoryFilterHTML(filter, 'bromendator')}
         ${recs.length
           ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
           : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">${u.nombre} no tiene recomendaciones en esta categoría.</p>`}
@@ -2030,7 +2040,7 @@
           renderBromendator(username);
         });
       });
-      bindSortDropdown('bromendator', (sort) => {
+      renderHeaderSort('bromendatorHeaderActions', 'bromendator', sortKey, (sort) => {
         state.bromendatorSort = sort;
         renderBromendator(username);
       });
@@ -2093,6 +2103,15 @@
       `;
     }
 
+    /* Pinta el dropdown en el slot del header (header-actions) y conecta listener.
+       slotId: id del div header-actions. idPrefix: identificador del dropdown. */
+    function renderHeaderSort(slotId, idPrefix, activeSort, onSelect) {
+      const slot = document.getElementById(slotId);
+      if (!slot) return;
+      slot.innerHTML = sortDropdownHTML(activeSort, idPrefix);
+      bindSortDropdown(idPrefix, onSelect);
+    }
+
     /* Conecta los listeners del dropdown a un callback */
     function bindSortDropdown(idPrefix, onSelect) {
       const wrapper = document.getElementById(`${idPrefix}-sort`);
@@ -2149,17 +2168,16 @@
       const recs = sortRecs(filtered, sortKey);
       
       const list = document.getElementById('bibliotecaList');
+      const headerSlot = document.getElementById('bibliotecaHeaderActions');
       
       if (baseRecs.length === 0) {
+        if (headerSlot) headerSlot.innerHTML = '';
         list.innerHTML = emptyStateHTML('📖', 'Tu biblioteca está vacía', 'Cuando valores recomendaciones, aparecerán aquí.');
         return;
       }
       
       list.innerHTML = `
-        <div class="filter-sort-row">
-          ${categoryFilterHTML(filter, 'biblioteca')}
-          ${sortDropdownHTML(sortKey, 'biblioteca')}
-        </div>
+        ${categoryFilterHTML(filter, 'biblioteca')}
         ${recs.length
           ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
           : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay nada en esta categoría aún.</p>`}
@@ -2172,7 +2190,7 @@
           renderBiblioteca();
         });
       });
-      bindSortDropdown('biblioteca', (sort) => {
+      renderHeaderSort('bibliotecaHeaderActions', 'biblioteca', sortKey, (sort) => {
         state.bibliotecaSort = sort;
         renderBiblioteca();
       });
@@ -2213,8 +2231,8 @@
 
         <h2 style="font-family:var(--font-display); font-size:22px; margin: var(--s-5) 0 var(--s-3);">Mis recomendaciones</h2>
         ${baseRecs.length ? `
-          <div class="filter-sort-row">
-            ${categoryFilterHTML(filter, 'perfil')}
+          ${categoryFilterHTML(filter, 'perfil')}
+          <div class="sort-row-standalone">
             ${sortDropdownHTML(sortKey, 'perfil')}
           </div>
         ` : ''}
@@ -2224,6 +2242,10 @@
               ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
               : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay recomendaciones en esta categoría.</p>`)}
       `;
+      
+      // Limpiar header slot (no se usa en perfil)
+      const headerSlot = document.getElementById('perfilHeaderActions');
+      if (headerSlot) headerSlot.innerHTML = '';
       
       // Listeners de filtro
       content.querySelectorAll('#perfil-filter .cat-filter-btn').forEach(btn => {
