@@ -236,7 +236,7 @@
       scrollbar-width: none;
     }
     .recs-carousel::-webkit-scrollbar { display: none; }
-    .recs-carousel .rec-card { flex: 0 0 188px; scroll-snap-align: start; }
+    .recs-carousel .rec-card { flex: 0 0 168px; scroll-snap-align: start; }
 
     .rec-card {
       background: var(--surface); border-radius: var(--radius);
@@ -261,7 +261,7 @@
     .rec-title {
       font-family: var(--font-display); font-weight: 700;
       font-size: 16px; line-height: 1.25; margin: 0;
-      display: -webkit-box; -webkit-line-clamp: 3;
+      display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
       word-break: break-word;
     }
@@ -415,9 +415,31 @@
     }
     .form-group { margin-bottom: var(--s-4); }
     .form-group:last-child { margin-bottom: 0; }
+    .form-group.optional {
+      background: rgba(0,0,0,0.015);
+      padding: var(--s-3);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--gray-100);
+    }
     .form-label {
       display: block; font-size: 13px; font-weight: 600;
       color: var(--ink); margin-bottom: var(--s-2);
+    }
+    .form-label .opt-tag {
+      display: inline-block;
+      padding: 2px 7px;
+      background: var(--gray-50);
+      color: var(--ink-soft);
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.3px;
+      border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+    }
+    .form-label .opt-tag.required {
+      background: #FFE3E0;
+      color: #C2453B;
     }
     .form-input, .form-textarea, .form-select {
       width: 100%;
@@ -514,8 +536,9 @@
       font-family: var(--font-display); font-weight: 700;
       font-size: 18px; margin: 0 0 var(--s-3);
     }
-    .detail-section p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+    .detail-section p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-soft); word-wrap: break-word; overflow-wrap: break-word; }
     .detail-section p + p { margin-top: var(--s-2); }
+    .rec-sinopsis { white-space: pre-wrap; }
 
     .reactions {
       display: flex; gap: var(--s-3); margin-bottom: var(--s-3);
@@ -591,6 +614,35 @@
       background: #E8F5EF;
       color: var(--c-action);
       font-weight: 600;
+    }
+
+    /* Filtro de categorías */
+    .cat-filter {
+      display: flex; gap: var(--s-2);
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 0 var(--s-3);
+      margin-bottom: var(--s-3);
+      scroll-snap-type: x mandatory;
+    }
+    .cat-filter::-webkit-scrollbar { display: none; }
+    .cat-filter-btn {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--gray-100);
+      background: var(--surface);
+      font-size: 13px; font-weight: 600;
+      color: var(--ink-soft);
+      transition: all 0.2s;
+      white-space: nowrap;
+      scroll-snap-align: start;
+    }
+    .cat-filter-btn .emoji { margin-right: 4px; }
+    .cat-filter-btn[aria-pressed="true"] {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
     }
 
     /* Badge "Para ti" en tarjetas dirigidas */
@@ -760,6 +812,47 @@
     .loading-bar.show { transform: scaleX(0.7); }
     .loading-bar.done { transform: scaleX(1); transition: transform 0.2s; }
 
+    /* Overlay de espera para acciones largas */
+    .busy-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255, 247, 237, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 400;
+      display: none;
+      align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .busy-overlay.show { display: flex; }
+    .busy-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: var(--s-5) var(--s-4);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+      text-align: center;
+      max-width: 320px; width: 90%;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .busy-spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--gray-100);
+      border-top-color: var(--c-action);
+      border-radius: 50%;
+      margin: 0 auto var(--s-3);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .busy-title {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 700;
+      margin: 0 0 var(--s-1);
+      color: var(--ink);
+    }
+    .busy-subtitle {
+      font-size: 13px; color: var(--ink-soft);
+      margin: 0;
+    }
+
     .empty-state {
       text-align: center;
       padding: var(--s-6) var(--s-4);
@@ -817,6 +910,15 @@
   </div>
 
   <div class="loading-bar" id="loadingBar"></div>
+  <!-- Overlay de espera para acciones largas -->
+  <div class="busy-overlay" id="busyOverlay">
+    <div class="busy-card">
+      <div class="busy-spinner"></div>
+      <p class="busy-title" id="busyTitle">Trabajando…</p>
+      <p class="busy-subtitle" id="busySubtitle">Por favor espera un momento</p>
+    </div>
+  </div>
+
   <!-- Modal genérico (edición, regenerar info, etc) -->
   <div class="modal-overlay" id="modalOverlay" style="display:none;">
     <div class="modal-card" id="modalCard">
@@ -913,7 +1015,7 @@
     <section class="screen" id="screen-biblioteca">
       <header class="screen-header">
         <div class="title-block">
-          <h1>Mi biblioteca</h1>
+          <h1>Biblioteca</h1>
           <p>Lo que has consumido y valorado</p>
         </div>
       </header>
@@ -958,56 +1060,56 @@
           <input type="text" id="recCreador" class="form-input" placeholder="Ej: Gabriel García Márquez">
         </div>
 
-        <div class="form-group" id="lugarGroup" style="display:none;">
+        <div class="form-group optional" id="lugarGroup" style="display:none;">
           <label class="form-label" for="recLugar">
-            Lugar <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
+            Lugar <span class="opt-tag">opcional</span>
           </label>
           <input type="text" id="recLugar" class="form-input" placeholder="Ej: Madrid, WiZink Center">
         </div>
 
-        <div class="form-group" id="spotifyGroup" style="display:none;">
+        <div class="form-group optional" id="spotifyGroup" style="display:none;">
           <label class="form-label" for="recSpotify">
-            Enlace de Spotify <span style="color:var(--ink-soft); font-weight:400;" id="spotifyOptional">(opcional)</span>
-            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;" id="spotifyHint">
+            Enlace de Spotify <span class="opt-tag" id="spotifyOptional">opcional</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:6px;" id="spotifyHint">
               Pégalo si lo tienes a mano. Si no, lo buscamos por ti.
             </span>
           </label>
           <input type="url" id="recSpotify" class="form-input" placeholder="https://open.spotify.com/...">
         </div>
 
-        <div class="form-group" id="videoGroup" style="display:none;">
+        <div class="form-group optional" id="videoGroup" style="display:none;">
           <label class="form-label" for="recVideo">
-            Enlace de YouTube <span style="color:var(--ink-soft); font-weight:400;" id="videoOptional">(opcional)</span>
-            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;" id="videoHint">
+            Enlace de YouTube <span class="opt-tag" id="videoOptional">opcional</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:6px;" id="videoHint">
               Si pegas un videoclip oficial, se mostrará en la recomendación.
             </span>
           </label>
           <input type="url" id="recVideo" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="recComentario">Tu comentario <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span></label>
+        <div class="form-group optional">
+          <label class="form-label" for="recComentario">Tu comentario <span class="opt-tag">opcional</span></label>
           <textarea id="recComentario" class="form-textarea" placeholder="¿Qué te ha gustado? ¿A quién se la recomendarías?"></textarea>
         </div>
 
-        <div class="form-group">
+        <div class="form-group optional">
           <label class="form-label">
-            ¿Para alguien en especial? <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
-            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;">
+            ¿Para alguien en especial? <span class="opt-tag">opcional</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:6px;">
               Marca a quién va dirigida especialmente. Verán la recomendación destacada.
             </span>
           </label>
           <div class="recipient-row" id="recipientRow"></div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group optional" id="detallesGroup">
           <label class="form-label" for="recDetalles">
-            Detalles para la IA <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>
-            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:2px;">
-              Año, director/autor o cualquier dato que ayude a identificar la obra correctamente.
+            Detalles extra <span class="opt-tag">opcional</span>
+            <span style="display:block; font-weight:400; font-size:11px; color:var(--ink-soft); margin-top:6px;" id="detallesHint">
+              Solo si la app no encuentra la obra correcta. Ej: año, director, plataforma.
             </span>
           </label>
-          <input type="text" id="recDetalles" class="form-input" placeholder="Ej: 2025, dirigida por Alauda Ruiz de Azúa">
+          <input type="text" id="recDetalles" class="form-input" placeholder="Ej: 2024">
         </div>
 
         <button class="btn-primary" id="submitRec">Compartir recomendación</button>
@@ -1017,8 +1119,8 @@
     <section class="screen" id="screen-bromendators">
       <header class="screen-header">
         <div class="title-block">
-          <h1>Bromendators</h1>
-          <p>Conoce a la familia recomendadora</p>
+          <h1>Familia</h1>
+          <p>De Bermejo al mundo.</p>
         </div>
       </header>
       <div id="bromendatorsList"></div>
@@ -1083,11 +1185,11 @@
   <nav class="nav" id="bottomNav">
     <a href="#/" class="nav-item" data-screen="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
-      Inicio
+      La cabañita
     </a>
     <a href="#/biblioteca" class="nav-item" data-screen="biblioteca">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h3v16H4zM10 4h3v16h-3zM17 6l3 1-3 14-3-1z"/></svg>
-      Mi biblioteca
+      Biblioteca
     </a>
     <div class="nav-cta">
       <a href="#/recomendar" class="nav-cta-btn" aria-label="Recomendar">
@@ -1097,7 +1199,7 @@
     </div>
     <a href="#/bromendators" class="nav-item" data-screen="bromendators">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2.5 2-5 5-5"/></svg>
-      Bromendators
+      Familia
     </a>
     <a href="#/perfil" class="nav-item" data-screen="perfil">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -1107,7 +1209,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '0.8.1';
+    const APP_VERSION = '0.9.0';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -1220,6 +1322,15 @@
         case 'musica':    return 'Artista';
         case 'libros':    return 'Autor';
         default:          return 'Creador';
+      }
+    }
+    function getSobreLabel(categoria) {
+      switch (categoria) {
+        case 'peliculas': return 'la película';
+        case 'series':    return 'la serie';
+        case 'musica':    return 'la música';
+        case 'libros':    return 'el libro';
+        default:          return 'esta obra';
       }
     }
     function formatRT(val) {
@@ -1386,9 +1497,13 @@
         updateCategoryBadges();
       }
     }
+    /**
+     * Recs dirigidas a mí PENDIENTES (no consumidas = sin valoración mía).
+     * Esto persiste hasta que las valoro con estrellas.
+     */
     function unreadForMe() {
-      const read = getReadIds();
-      return recsForMe().filter(r => !read.has(r.id));
+      if (!state.currentUser) return [];
+      return recsForMe().filter(r => !getMyRating(r.id));
     }
     function updateBell() {
       const dot = document.getElementById('bellDot');
@@ -1403,8 +1518,7 @@
     }
     
     /**
-     * Cuenta no leídas por categoría (cualquier rec que el usuario no haya abierto,
-     * excluyendo las suyas propias).
+     * Cuenta no leídas por categoría (recs que no he abierto, no son mías).
      */
     function unreadCountForCategory(categoria) {
       if (!state.currentUser) return 0;
@@ -1485,6 +1599,16 @@
       const bar = document.getElementById('loadingBar');
       bar.className = 'loading-bar done';
       setTimeout(() => { bar.className = 'loading-bar'; }, 250);
+    }
+    function showBusy(title, subtitle) {
+      document.getElementById('busyTitle').textContent = title || 'Trabajando…';
+      document.getElementById('busySubtitle').textContent = subtitle || 'Por favor espera un momento';
+      document.getElementById('busyOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function hideBusy() {
+      document.getElementById('busyOverlay').classList.remove('show');
+      document.body.style.overflow = '';
     }
     function emptyStateHTML(emoji, title, msg) {
       return `<div class="empty-state"><div class="emoji">${emoji}</div><h3>${title}</h3><p>${msg}</p></div>`;
@@ -1704,40 +1828,99 @@
       const u = getUserBy(username);
       if (!u) { location.hash = '#/bromendators'; return; }
       document.getElementById('bromendatorName').textContent = u.nombre;
-      const recs = state.data.recomendaciones
+      const filter = state.bromendatorFilter || 'all';
+      const allRecs = state.data.recomendaciones
         .filter(r => r.autor === username)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      document.getElementById('bromendatorMeta').textContent = recs.length === 1 ? '1 recomendación' : `${recs.length} recomendaciones`;
+      const recs = filter === 'all' ? allRecs : allRecs.filter(r => r.categoria === filter);
+      document.getElementById('bromendatorMeta').textContent = allRecs.length === 1 ? '1 recomendación' : `${allRecs.length} recomendaciones`;
       const content = document.getElementById('bromendatorContent');
-      content.innerHTML = recs.length
-        ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
-        : emptyStateHTML('🤔', `${u.nombre} aún no recomienda nada`, '¡Anímalo a compartir!');
+      
+      if (allRecs.length === 0) {
+        content.innerHTML = emptyStateHTML('🤔', `${u.nombre} aún no recomienda nada`, '¡Anímalo a compartir!');
+        return;
+      }
+      
+      content.innerHTML = `
+        ${categoryFilterHTML(filter, 'bromendator')}
+        ${recs.length
+          ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
+          : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">${u.nombre} no tiene recomendaciones en esta categoría.</p>`}
+      `;
+      
+      content.querySelectorAll('#bromendator-filter .cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.bromendatorFilter = btn.dataset.cat;
+          renderBromendator(username);
+        });
+      });
     }
 
     /* ========== RENDER: BIBLIOTECA ========== */
+    function categoryFilterHTML(activeFilter, idPrefix) {
+      const cats = [
+        { key: 'all',       label: 'Todas',     emoji: '✨' },
+        { key: 'peliculas', label: 'Películas', emoji: '🍿' },
+        { key: 'series',    label: 'Series',    emoji: '📺' },
+        { key: 'musica',    label: 'Música',    emoji: '🎧' },
+        { key: 'libros',    label: 'Libros',    emoji: '📚' },
+      ];
+      return `
+        <div class="cat-filter" id="${idPrefix}-filter">
+          ${cats.map(c => `
+            <button class="cat-filter-btn" data-cat="${c.key}" aria-pressed="${activeFilter === c.key}">
+              <span class="emoji">${c.emoji}</span> ${c.label}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+    
     function renderBiblioteca() {
+      const filter = state.bibliotecaFilter || 'all';
       const myConsumido = state.data.consumido.filter(c => c.usuario === state.currentUser);
       const recIds = new Set(myConsumido.map(c => c.recomendacion_id));
-      const recs = state.data.recomendaciones
+      const allRecs = state.data.recomendaciones
         .filter(r => recIds.has(r.id))
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const recs = filter === 'all' ? allRecs : allRecs.filter(r => r.categoria === filter);
+      
       const list = document.getElementById('bibliotecaList');
-      list.innerHTML = recs.length
-        ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
-        : emptyStateHTML('📖', 'Tu biblioteca está vacía', 'Cuando valores recomendaciones, aparecerán aquí.');
+      
+      if (allRecs.length === 0) {
+        list.innerHTML = emptyStateHTML('📖', 'Tu biblioteca está vacía', 'Cuando valores recomendaciones, aparecerán aquí.');
+        return;
+      }
+      
+      list.innerHTML = `
+        ${categoryFilterHTML(filter, 'biblioteca')}
+        ${recs.length
+          ? `<div class="rec-list">${recs.map(recListItemHTML).join('')}</div>`
+          : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay nada en esta categoría aún.</p>`}
+      `;
+      
+      // Listeners
+      list.querySelectorAll('#biblioteca-filter .cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.bibliotecaFilter = btn.dataset.cat;
+          renderBiblioteca();
+        });
+      });
     }
 
     /* ========== RENDER: PERFIL ========== */
     function renderPerfil() {
       const u = getUserBy(state.currentUser);
       if (!u) return;
-      const myRecs = state.data.recomendaciones
+      const filter = state.perfilFilter || 'all';
+      const allMyRecs = state.data.recomendaciones
         .filter(r => r.autor === state.currentUser)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const myRecs = filter === 'all' ? allMyRecs : allMyRecs.filter(r => r.categoria === filter);
       const myVals = state.data.valoraciones.filter(v => v.usuario === state.currentUser);
 
       document.getElementById('perfilSubtitle').textContent =
-        `${myRecs.length} recomendacion${myRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
+        `${allMyRecs.length} recomendacion${allMyRecs.length === 1 ? '' : 'es'} · ${myVals.length} valoracion${myVals.length === 1 ? '' : 'es'}`;
 
       const isUserAdmin = String(u.admin).toUpperCase() === 'TRUE';
 
@@ -1759,10 +1942,21 @@
         ` : ''}
 
         <h2 style="font-family:var(--font-display); font-size:22px; margin: var(--s-5) 0 var(--s-3);">Mis recomendaciones</h2>
-        ${myRecs.length
-          ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
-          : emptyStateHTML('✨', 'No has recomendado nada aún', 'Pulsa el botón verde para empezar.')}
+        ${allMyRecs.length ? categoryFilterHTML(filter, 'perfil') : ''}
+        ${allMyRecs.length === 0
+          ? emptyStateHTML('✨', 'No has recomendado nada aún', 'Pulsa el botón verde para empezar.')
+          : (myRecs.length
+              ? `<div class="rec-list">${myRecs.map(recListItemHTML).join('')}</div>`
+              : `<p style="text-align:center; color:var(--ink-soft); padding: var(--s-5) var(--s-3); font-size:14px;">No hay recomendaciones en esta categoría.</p>`)}
       `;
+      
+      // Listeners de filtro
+      content.querySelectorAll('#perfil-filter .cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.perfilFilter = btn.dataset.cat;
+          renderPerfil();
+        });
+      });
     }
     function logout() {
       if (!confirm('¿Cerrar sesión y elegir otro usuario?')) return;
@@ -1930,17 +2124,31 @@
       const recVideo      = document.getElementById('recVideo');
       const recSpotify    = document.getElementById('recSpotify');
       const recLugar      = document.getElementById('recLugar');
+      const detallesInput = document.getElementById('recDetalles');
+      const detallesHint  = document.getElementById('detallesHint');
       
       // Defaults: ocultar todos los campos extra y mostrar título
       tituloGroup.style.display = 'block';
       tituloLabel.textContent = 'Título';
-      tituloInput.placeholder = 'Ej: Cien años de soledad';
+      tituloInput.placeholder = 'Ej: Anatomía de una caída';
       lugarGroup.style.display = 'none';
       spotifyGroup.style.display = 'none';
       videoGroup.style.display = 'none';
       
       // CATEGORÍAS NO MÚSICA
       if (categoria !== 'musica') {
+        // Placeholders y detalles según categoría
+        if (categoria === 'peliculas') {
+          tituloInput.placeholder = 'Ej: Anatomía de una caída';
+          if (detallesInput) detallesInput.placeholder = 'Ej: 2023, Justine Triet';
+        } else if (categoria === 'series') {
+          tituloInput.placeholder = 'Ej: Severance';
+          if (detallesInput) detallesInput.placeholder = 'Ej: Apple TV+, 2022';
+        } else if (categoria === 'libros') {
+          tituloInput.placeholder = 'Ej: Cien años de soledad';
+          if (detallesInput) detallesInput.placeholder = 'Ej: edición ilustrada, 2017';
+        }
+        
         // Libros: mostrar Autor
         if (categoria === 'libros') {
           creadorGroup.style.display = 'block';
@@ -1950,7 +2158,6 @@
           creadorGroup.style.display = 'none';
           creadorInput.value = '';
         }
-        // Limpiar campos no usados
         if (recSpotify) recSpotify.value = '';
         if (recVideo) recVideo.value = '';
         if (recLugar) recLugar.value = '';
@@ -1958,6 +2165,7 @@
       }
       
       // MÚSICA
+      if (detallesInput) detallesInput.placeholder = 'Ej: 2023, álbum debut';
       switch (subcategoria) {
         case 'cancion':
           tituloLabel.textContent = 'Título de la canción';
@@ -1967,7 +2175,8 @@
           creadorInput.placeholder = 'Ej: Olivia Rodrigo';
           spotifyGroup.style.display = 'block';
           videoGroup.style.display = 'block';
-          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoOptional) videoOptional.textContent = 'opcional';
+          if (videoOptional) videoOptional.classList.remove('required');
           if (videoHint) videoHint.textContent = 'Si pegas un videoclip oficial, se mostrará junto a la canción.';
           break;
         
@@ -1979,24 +2188,25 @@
           creadorInput.placeholder = 'Ej: Radiohead';
           spotifyGroup.style.display = 'block';
           videoGroup.style.display = 'block';
-          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoOptional) videoOptional.textContent = 'opcional';
+          if (videoOptional) videoOptional.classList.remove('required');
           if (videoHint) videoHint.textContent = 'Si pegas un video del álbum, se mostrará en la recomendación.';
           break;
         
         case 'artista':
-          // Para artista, el "título" ES el nombre del artista. Escondemos campo separado.
           tituloLabel.textContent = 'Nombre del artista';
           tituloInput.placeholder = 'Ej: Bad Bunny';
           creadorGroup.style.display = 'none';
           creadorInput.value = '';
           spotifyGroup.style.display = 'block';
           videoGroup.style.display = 'block';
-          if (videoOptional) videoOptional.textContent = '(opcional)';
+          if (videoOptional) videoOptional.textContent = 'opcional';
+          if (videoOptional) videoOptional.classList.remove('required');
           if (videoHint) videoHint.textContent = 'Si pegas un videoclip representativo, se mostrará en la recomendación.';
           break;
         
         case 'concierto':
-          tituloLabel.innerHTML = 'Nombre del concierto o gira <span style="color:var(--ink-soft); font-weight:400;">(opcional)</span>';
+          tituloLabel.innerHTML = 'Nombre del concierto o gira <span class="opt-tag">opcional</span>';
           tituloInput.placeholder = 'Ej: World\'s Hottest Tour';
           creadorGroup.style.display = 'block';
           creadorLabel.textContent = 'Artista';
@@ -2005,13 +2215,14 @@
           spotifyGroup.style.display = 'none';
           if (recSpotify) recSpotify.value = '';
           videoGroup.style.display = 'block';
-          // Para concierto, el video es OBLIGATORIO
-          if (videoOptional) videoOptional.textContent = '(obligatorio)';
-          if (videoHint) videoHint.textContent = 'Pega un video del concierto para que se muestre en la recomendación.';
+          if (videoOptional) {
+            videoOptional.textContent = 'obligatorio';
+            videoOptional.classList.add('required');
+          }
+          if (videoHint) videoHint.textContent = 'Pega un video del concierto. Es la fuente principal de la recomendación.';
           break;
         
         default:
-          // Sin subcategoría todavía
           creadorGroup.style.display = 'none';
           break;
       }
@@ -2073,7 +2284,7 @@
       }
       
       btn.disabled = true;
-      btn.textContent = 'Enriqueciendo con IA... ✨';
+      showBusy('Compartiendo recomendación…', 'Buscando información en internet 🔍');
       try {
         const dirigido_a = (state.formNew.destinatarios || []).join(',');
         const res = await apiGet('createRec', {
@@ -2091,9 +2302,11 @@
         });
         toast(dirigido_a ? '¡Compartida! Avisaremos a los destinatarios 🔔' : '¡Recomendación compartida! 🎉', 'success');
         await loadData({ silent: true });
+        hideBusy();
         location.hash = res.id ? `#/rec/${res.id}` : '#/';
       } catch (err) {
-        toast('Error al guardar: ' + err.message, 'error');
+        hideBusy();
+        toast('Error: ' + err.message, 'error');
         btn.disabled = false;
         btn.textContent = 'Compartir recomendación';
       }
@@ -2187,8 +2400,8 @@
 
         ${r.sinopsis ? `
           <div class="detail-section">
-            <h3>Sobre ${cat.singular.toLowerCase()}</h3>
-            <p>${escapeHTML(r.sinopsis)}</p>
+            <h3>Sobre ${getSobreLabel(r.categoria)}</h3>
+            <p class="rec-sinopsis">${escapeHTML(r.sinopsis)}</p>
             ${r.creador ? `<p><strong>${getCreadorLabel(r.categoria)}:</strong> ${escapeHTML(r.creador)}</p>` : ''}
             ${r.año ? `<p><strong>Año:</strong> ${escapeHTML(r.año)}</p>` : ''}
             ${r.generos ? `<p><strong>Géneros:</strong> ${escapeHTML(r.generos)}</p>` : ''}
@@ -2217,24 +2430,44 @@
         ` : ''))) }
 
         <div class="detail-section">
-          <h3>¿Qué te ha parecido?</h3>
-          <div class="reactions">
-            <button class="react-btn like" data-react="like" aria-pressed="${myReaction?.tipo === 'like'}">
-              <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'like' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
-              Me gustó
-            </button>
-            <button class="react-btn dislike" data-react="dislike" aria-pressed="${myReaction?.tipo === 'dislike'}">
-              <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'dislike' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
-              No me gustó
-            </button>
-          </div>
+          <h3>${isMine ? 'Reacciones' : '¿Qué te ha parecido?'}</h3>
+          ${!isMine ? `
+            <div class="reactions">
+              <button class="react-btn like" data-react="like" aria-pressed="${myReaction?.tipo === 'like'}">
+                <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'like' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
+                Me gustó
+              </button>
+              <button class="react-btn dislike" data-react="dislike" aria-pressed="${myReaction?.tipo === 'dislike'}">
+                <svg viewBox="0 0 24 24" fill="${myReaction?.tipo === 'dislike' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleY(-1)"><path d="M7 11v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3M14 9V5a3 3 0 0 0-6 0v6h2l-1 8h7a3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
+                No me gustó
+              </button>
+            </div>
+          ` : ''}
           ${(likes.length || dislikes.length) ? `
-            <div class="react-counts">
+            <div class="react-counts" ${isMine ? 'style="margin-top:0;"' : ''}>
               ${likes.length ? `<div class="react-count-group">👍 <div class="react-count-avatars">${likes.slice(0, 5).map(x => avatarHTML(x.usuario)).join('')}</div> ${likes.length}</div>` : ''}
               ${dislikes.length ? `<div class="react-count-group">👎 <div class="react-count-avatars">${dislikes.slice(0, 5).map(x => avatarHTML(x.usuario)).join('')}</div> ${dislikes.length}</div>` : ''}
             </div>
-          ` : ''}
+          ` : (isMine ? `<p style="font-size:13px; color:var(--ink-soft); text-align:center; margin:0;">Aún nadie ha reaccionado.</p>` : '')}
         </div>
+
+        ${isMine ? `
+          <div class="detail-section">
+            <p style="font-size:13px; text-align:center;">Esta es tu propia recomendación.</p>
+            <div style="display:flex; gap:var(--s-2); margin-top:var(--s-3); justify-content:center;">
+              <button class="btn-ghost" id="editRec">✏️ Editar</button>
+              <button class="btn-ghost" id="deleteRec" style="color:var(--c-danger);">🗑️ Borrar</button>
+            </div>
+          </div>
+        ` : isAdmin() ? `
+          <div class="detail-section" style="background: #FFF8E1; border: 1px dashed #FFC857;">
+            <p style="font-size:13px; text-align:center; color: #8B6500;">⭐ Acciones de administrador</p>
+            <div style="display:flex; gap:var(--s-2); margin-top:var(--s-3); justify-content:center;">
+              <button class="btn-ghost" id="editRec">✏️ Editar</button>
+              <button class="btn-ghost" id="deleteRec" style="color:var(--c-danger);">🗑️ Borrar</button>
+            </div>
+          </div>
+        ` : ''}
 
         ${!isMine ? `
           <div class="detail-section">
@@ -2252,15 +2485,7 @@
               ${myRating ? `<button class="btn-ghost" id="deleteRating">Borrar</button>` : ''}
             </div>
           </div>
-        ` : `
-          <div class="detail-section">
-            <p style="font-size:13px; text-align:center;">Esta es tu propia recomendación.</p>
-            <div style="display:flex; gap:var(--s-2); margin-top:var(--s-3); justify-content:center;">
-              <button class="btn-ghost" id="editRec">✏️ Editar</button>
-              <button class="btn-ghost" id="deleteRec" style="color:var(--c-danger);">🗑️ Borrar</button>
-            </div>
-          </div>
-        `}
+        ` : ''}
 
         ${valoraciones.length ? `
           <div class="detail-section">
@@ -2329,6 +2554,7 @@
               });
               toast('Valoración guardada ⭐', 'success');
               await loadData({ silent: true });
+              updateBell();
               renderRecDetail(r.id);
             } catch (err) {
               toast('Error: ' + err.message, 'error');
@@ -2345,6 +2571,7 @@
               await apiGet('deleteRating', { recId: r.id, usuario: state.currentUser });
               toast('Borrada', 'success');
               await loadData({ silent: true });
+              updateBell();
               renderRecDetail(r.id);
             } catch (err) {
               toast('Error: ' + err.message, 'error');
@@ -2394,12 +2621,15 @@
       if (delRecBtn) {
         delRecBtn.addEventListener('click', async () => {
           if (!confirm('¿Borrar esta recomendación? No se puede deshacer.')) return;
+          showBusy('Borrando recomendación…', 'Un momento por favor');
           try {
             await apiGet('deleteRec', { id: r.id });
-            toast('Borrada', 'success');
             await loadData({ silent: true });
+            hideBusy();
+            toast('Borrada', 'success');
             location.hash = '#/';
           } catch (err) {
+            hideBusy();
             toast('Error: ' + err.message, 'error');
           }
         });
