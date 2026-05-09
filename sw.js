@@ -8,7 +8,7 @@
  * El cliente recibe un 'controllerchange' y muestra el toast de "nueva versión".
  */
 
-const CACHE_VERSION = 'bromendations-v2.0';
+const CACHE_VERSION = 'bromendations-v2.1';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const IMAGES_CACHE = `${CACHE_VERSION}-images`;
 
@@ -61,20 +61,23 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Imágenes locales: cache-first
+  // Imágenes locales: stale-while-revalidate
+  // Devolvemos cache al instante (rápido), pero a la vez pedimos al server.
+  // Si el server tiene una versión nueva, queda cacheada para la próxima carga.
   if (isLocalImage(url)) {
     event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((res) => {
-          // Solo cacheamos respuestas OK
-          if (res && res.status === 200) {
-            const clone = res.clone();
-            caches.open(IMAGES_CACHE).then((cache) => cache.put(req, clone));
-          }
-          return res;
-        }).catch(() => cached);
-      })
+      caches.open(IMAGES_CACHE).then((cache) =>
+        cache.match(req).then((cached) => {
+          const fetchPromise = fetch(req).then((res) => {
+            if (res && res.status === 200) {
+              cache.put(req, res.clone());
+            }
+            return res;
+          }).catch(() => cached);
+          // Si hay cache, devolver al instante; si no, esperar al fetch
+          return cached || fetchPromise;
+        })
+      )
     );
     return;
   }

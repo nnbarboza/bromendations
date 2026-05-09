@@ -1332,7 +1332,6 @@
         <button class="back-btn" onclick="history.back()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
         <div class="title-block">
           <h1>Novedades</h1>
-          <p>Todas las recomendaciones por fecha</p>
         </div>
         <div class="header-actions" id="novedadesHeaderActions"></div>
       </header>
@@ -1391,7 +1390,7 @@
 
   <script>
     /* ========== CONFIG ========== */
-    const APP_VERSION = '2.0';
+    const APP_VERSION = '2.1';
     const API_URL = 'https://script.google.com/macros/s/AKfycbwqd4g2qm4hiumrob54_eGgVd1N7YJAmIgXANkin6X91-VjWhlUWf0CnznHbd9zdrAm/exec';
 
     const CATEGORIES = {
@@ -2772,7 +2771,13 @@
           <div class="detail-section">
             <p style="text-align:center;">⏳ Enriqueciendo con IA y buscando en internet... <span id="autoRefreshHint" style="font-size:12px; color:var(--ink-soft); display:block; margin-top:8px;">Puede tardar 5-15 segundos. Refrescando automáticamente...</span></p>
           </div>
-        ` : ''))) }
+        ` : `
+          <div class="detail-section" style="background:#FFF8E1; border:1.5px dashed #FFC857;">
+            <h3 style="color:#8B6500;">Info no encontrada :(</h3>
+            <p>La IA no logró encontrar información sobre esta obra. Probá editarla con más detalles (autor, año, artista...) o regenerar.</p>
+            ${(isMine || isAdmin()) ? `<div style="text-align:center; margin-top:var(--s-3);"><button class="btn-primary" id="reEnrichBtn" style="max-width:280px;">🔄 Regenerar info</button></div>` : ''}
+          </div>
+        `))) }
 
         <div class="detail-section">
           <h3>${isMine ? 'Reacciones' : '¿Qué te ha parecido?'}</h3>
@@ -2942,12 +2947,77 @@
             `;
           }).join('');
 
+          // Campos extra según categoría/subcategoría
+          const cat = r.categoria;
+          const subcat = r.subcategoria || '';
+          let extraFieldsHTML = '';
+          let tituloLabel = 'Título';
+
+          if (cat === 'libros') {
+            tituloLabel = 'Título del libro';
+            extraFieldsHTML = `
+              <div class="form-group">
+                <label class="form-label" for="editCreador">Autor/a</label>
+                <input type="text" id="editCreador" class="form-input" value="${escapeHTML(r.creador || '')}" placeholder="Ej: Gabriel García Márquez">
+              </div>
+            `;
+          } else if (cat === 'peliculas') {
+            tituloLabel = 'Título';
+          } else if (cat === 'series') {
+            tituloLabel = 'Título';
+          } else if (cat === 'musica') {
+            const showCreador = subcat !== 'artista';
+            const showSpotify = subcat !== 'concierto';
+            const showVideo = true;
+            const showLugar = subcat === 'concierto';
+
+            if (subcat === 'cancion') tituloLabel = 'Título de la canción';
+            else if (subcat === 'album') tituloLabel = 'Título del álbum';
+            else if (subcat === 'artista') tituloLabel = 'Nombre del artista';
+            else if (subcat === 'concierto') tituloLabel = 'Nombre del concierto o gira';
+
+            extraFieldsHTML = `
+              ${showCreador ? `
+                <div class="form-group">
+                  <label class="form-label" for="editCreador">Artista</label>
+                  <input type="text" id="editCreador" class="form-input" value="${escapeHTML(r.creador || '')}" placeholder="Ej: Olivia Rodrigo">
+                </div>
+              ` : ''}
+              ${showSpotify ? `
+                <div class="form-group">
+                  <label class="form-label" for="editSpotify">Enlace de Spotify <span style="font-weight:400; color:var(--ink-soft); font-size:11px;">(opcional)</span></label>
+                  <input type="url" id="editSpotify" class="form-input" value="${escapeHTML(r.enlace_spotify || '')}" placeholder="https://open.spotify.com/...">
+                </div>
+              ` : ''}
+              ${showVideo ? `
+                <div class="form-group">
+                  <label class="form-label" for="editVideo">Enlace de YouTube ${subcat === 'concierto' ? '<span style="color:var(--c-danger); font-size:11px;">(obligatorio)</span>' : '<span style="font-weight:400; color:var(--ink-soft); font-size:11px;">(opcional)</span>'}</label>
+                  <input type="url" id="editVideo" class="form-input" value="${escapeHTML(r.trailer_url || '')}" placeholder="https://youtube.com/...">
+                </div>
+              ` : ''}
+              ${showLugar ? `
+                <div class="form-group">
+                  <label class="form-label" for="editLugar">Lugar y fecha</label>
+                  <input type="text" id="editLugar" class="form-input" value="${escapeHTML(r.lugar || '')}" placeholder="Ej: Palau Sant Jordi, Barcelona, 2024">
+                </div>
+              ` : ''}
+            `;
+          }
+
           showModal({
             title: 'Editar recomendación',
             bodyHtml: `
               <div class="form-group">
-                <label class="form-label" for="editTitulo">Título</label>
+                <label class="form-label" for="editTitulo">${tituloLabel}</label>
                 <input type="text" id="editTitulo" class="form-input" value="${escapeHTML(r.titulo)}">
+              </div>
+              ${extraFieldsHTML}
+              <div class="form-group">
+                <label class="form-label" for="editDetalles">Pistas para la IA <span style="font-weight:400; color:var(--ink-soft); font-size:11px;">(opcional)</span></label>
+                <input type="text" id="editDetalles" class="form-input" placeholder="Ej: 2023, edición ilustrada, álbum debut">
+                <span style="display:block; font-size:11px; color:var(--ink-soft); margin-top:4px;">
+                  Año, plataforma o cualquier dato extra para que la IA encuentre la obra correcta.
+                </span>
               </div>
               <div class="form-group">
                 <label class="form-label" for="editComentario">Tu comentario</label>
@@ -2961,32 +3031,83 @@
                 </span>
               </div>
               <p style="font-size:12px; color:var(--ink-soft); margin: var(--s-2) 0 0;">
-                Si querés cambiar la información autogenerada (sinopsis, póster, etc.), usá "Regenerar info" en su lugar.
+                Al guardar, la información (sinopsis, póster, etc.) se regenerará con los nuevos datos.
               </p>
             `,
             secondaryLabel: 'Cancelar',
-            primaryLabel: 'Guardar cambios',
+            primaryLabel: 'Guardar y regenerar',
             onSubmit: async () => {
               const newTitle = document.getElementById('editTitulo').value.trim();
               const newComment = document.getElementById('editComentario').value.trim();
               if (!newTitle) { toast('El título no puede estar vacío', 'error'); return; }
+
+              // Lectura de campos opcionales (solo si existen en el DOM)
+              const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.value.trim() : '';
+              };
+              const newCreador = getVal('editCreador');
+              const newSpotify = getVal('editSpotify');
+              const newVideo = getVal('editVideo');
+              const newLugar = getVal('editLugar');
+              const newDetalles = getVal('editDetalles');
+
+              // Detectar si cambió algo que justifique reEnrich
+              const titleChanged = newTitle !== (r.titulo || '');
+              const creadorChanged = newCreador !== (r.creador || '');
+              const videoChanged = newVideo !== (r.trailer_url || '');
+              const spotifyChanged = newSpotify !== (r.enlace_spotify || '');
+              const lugarChanged = newLugar !== (r.lugar || '');
+              const detallesProvided = newDetalles.length > 0;
+              const shouldReEnrich = titleChanged || creadorChanged || videoChanged || spotifyChanged || lugarChanged || detallesProvided;
+
               // Recolectar destinatarios marcados
               const newDest = [];
               document.querySelectorAll('#editRecipientRow .edit-recipient-pill[aria-pressed="true"]').forEach(btn => {
                 newDest.push(btn.dataset.username);
               });
+
+              closeModal();
+              showBusy(
+                shouldReEnrich ? 'Guardando y regenerando…' : 'Guardando…',
+                shouldReEnrich ? 'Buscando info en el modular naranja 🔍' : 'Un momento por favor'
+              );
+
               try {
-                await apiGet('updateRec', {
+                // 1. Actualizar campos persistentes en el Sheet
+                const updateParams = {
                   id: r.id,
                   titulo: newTitle,
                   comentario: newComment,
                   dirigido_a: newDest.join(','),
-                });
-                closeModal();
-                toast('Actualizada ✏️', 'success');
+                };
+                if (cat === 'libros' || (cat === 'musica' && subcat !== 'artista')) {
+                  updateParams.creador = newCreador;
+                }
+                if (cat === 'musica' && newVideo !== r.trailer_url) {
+                  updateParams.trailer_url = newVideo;
+                }
+                await apiGet('updateRec', updateParams);
+
+                // 2. Si hay cambios que afecten enriquecimiento, relanzar
+                if (shouldReEnrich) {
+                  const reEnrichParams = {
+                    recId: r.id,
+                    detalles: newDetalles,
+                  };
+                  if (newSpotify) reEnrichParams.enlace_spotify = newSpotify;
+                  if (newVideo) reEnrichParams.video_url = newVideo;
+                  if (newLugar) reEnrichParams.lugar = newLugar;
+                  if (newCreador) reEnrichParams.creador_manual = newCreador;
+                  await apiGet('reEnrich', reEnrichParams);
+                }
+
+                hideBusy();
+                toast(shouldReEnrich ? 'Actualizada ✨' : 'Actualizada ✏️', 'success');
                 await loadData({ silent: true });
                 renderRecDetail(r.id);
               } catch (err) {
+                hideBusy();
                 toast('Error: ' + err.message, 'error');
               }
             },
