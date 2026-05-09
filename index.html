@@ -377,6 +377,7 @@
       display: flex;
       justify-content: center;
     }
+    .familia-hero picture { display: block; width: 100%; }
     .familia-hero img {
       display: block;
       width: 100%;
@@ -926,6 +927,45 @@
     .toast.error { background: var(--c-danger); }
     .toast.success { background: var(--c-action); }
 
+    /* Toast de actualización (Service Worker) */
+    .update-toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--ink);
+      color: white;
+      padding: 10px 8px 10px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 300;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: calc(100% - 32px);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .update-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .update-toast-text { white-space: nowrap; }
+    .update-toast-btn {
+      background: var(--c-action);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .update-toast-btn:hover { background: var(--c-action-hover, var(--c-action)); filter: brightness(1.1); }
+
     .loading-bar {
       position: fixed; top: 0; left: 0; right: 0;
       height: 3px;
@@ -1090,7 +1130,7 @@
               <div class="cat-name">Películas</div>
             </div>
           </div>
-          <div class="cat-art"><img src="img/categorias/peliculas.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🍿</span>'"></div>
+          <div class="cat-art"><picture><source srcset="img/categorias/peliculas.webp" type="image/webp"><img src="img/categorias/peliculas.png" alt="" onerror="this.parentNode.outerHTML='<span class=\'emoji-fallback\'>🍿</span>'"></picture></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -1102,7 +1142,7 @@
               <div class="cat-name">Series</div>
             </div>
           </div>
-          <div class="cat-art"><img src="img/categorias/series.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📺</span>'"></div>
+          <div class="cat-art"><picture><source srcset="img/categorias/series.webp" type="image/webp"><img src="img/categorias/series.png" alt="" onerror="this.parentNode.outerHTML='<span class=\'emoji-fallback\'>📺</span>'"></picture></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -1114,7 +1154,7 @@
               <div class="cat-name">Música</div>
             </div>
           </div>
-          <div class="cat-art"><img src="img/categorias/musica.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>🎧</span>'"></div>
+          <div class="cat-art"><picture><source srcset="img/categorias/musica.webp" type="image/webp"><img src="img/categorias/musica.png" alt="" onerror="this.parentNode.outerHTML='<span class=\'emoji-fallback\'>🎧</span>'"></picture></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
 
@@ -1126,7 +1166,7 @@
               <div class="cat-name">Libros</div>
             </div>
           </div>
-          <div class="cat-art"><img src="img/categorias/libros.png" alt="" onerror="this.outerHTML='<span class=\'emoji-fallback\'>📚</span>'"></div>
+          <div class="cat-art"><picture><source srcset="img/categorias/libros.webp" type="image/webp"><img src="img/categorias/libros.png" alt="" onerror="this.parentNode.outerHTML='<span class=\'emoji-fallback\'>📚</span>'"></picture></div>
           <div class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
         </a>
       </div>
@@ -1251,7 +1291,11 @@
         </div>
       </header>
       <div class="familia-hero">
-        <img id="familiaHeroImg" src="img/familia.png" alt="" data-fallback="🏡" data-fallback-class="hero-placeholder">
+        <picture>
+          <source srcset="img/familia.avif" type="image/avif">
+          <source srcset="img/familia.webp" type="image/webp">
+          <img id="familiaHeroImg" src="img/familia.png" alt="" data-fallback="🏡" data-fallback-class="hero-placeholder">
+        </picture>
       </div>
       <div id="bromendatorsList"></div>
       <footer class="familia-credits">
@@ -3095,6 +3139,60 @@
 
     window.addEventListener('hashchange', navigate);
     window.addEventListener('DOMContentLoaded', initApp);
+
+    /* ========== SERVICE WORKER (auto-update) ========== */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/bromendations/sw.js', { scope: '/bromendations/' })
+          .then((reg) => {
+            // Si ya hay un SW esperando al cargar la app, mostrar toast
+            if (reg.waiting && navigator.serviceWorker.controller) {
+              showUpdateToast(reg.waiting);
+            }
+            // Detectar instalación de nueva versión
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (!newWorker) return;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // Hay un SW viejo controlando + uno nuevo instalado → hay update
+                  showUpdateToast(newWorker);
+                }
+              });
+            });
+            // Chequear updates periódicamente (cada 30 min mientras la pestaña está abierta)
+            setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+          })
+          .catch((err) => console.warn('SW registration failed:', err));
+
+        // Recargar la página cuando el nuevo SW toma control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+      });
+    }
+
+    function showUpdateToast(worker) {
+      // Evitar mostrarlo si ya está visible
+      if (document.getElementById('updateToast')) return;
+      const toast = document.createElement('div');
+      toast.id = 'updateToast';
+      toast.className = 'update-toast';
+      toast.innerHTML = `
+        <span class="update-toast-text">✨ Hay una versión nueva</span>
+        <button class="update-toast-btn" type="button">Actualizar</button>
+      `;
+      document.body.appendChild(toast);
+      // Animación de entrada
+      requestAnimationFrame(() => toast.classList.add('show'));
+      toast.querySelector('.update-toast-btn').addEventListener('click', () => {
+        toast.classList.remove('show');
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      });
+    }
   </script>
 
 </body>
